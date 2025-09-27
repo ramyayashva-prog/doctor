@@ -258,11 +258,18 @@ class AuthController:
                 doctor = self.doctor_model.get_doctor_by_id(email)
             
             if not doctor:
+                print(f"❌ Doctor not found for email/doctor_id: {email}")
                 return jsonify({'error': 'Invalid credentials'}), 401
             
+            print(f"✅ Doctor found: {doctor.get('username', 'Unknown')} ({doctor.get('doctor_id', 'No ID')})")
+            
             # Verify password using the identifier (email or doctor_id)
-            if not self.doctor_model.verify_password(email, password):
+            password_valid = self.doctor_model.verify_password(email, password)
+            if not password_valid:
+                print(f"❌ Password verification failed for: {email}")
                 return jsonify({'error': 'Invalid credentials'}), 401
+            
+            print(f"✅ Password verified for: {email}")
             
             # Generate JWT token
             token_data = {

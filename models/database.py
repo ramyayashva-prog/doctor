@@ -33,6 +33,7 @@ class Database:
                 print(f"🔍 Attempting to connect to MongoDB...")
                 print(f"🔍 URI: {mongodb_uri}")
                 print(f"🔍 Database: {database_name}")
+                print(f"🔍 Environment: {'Production' if 'render' in str(mongodb_uri).lower() else 'Development'}")
                 
                 # Create MongoDB client with better connection parameters
                 self.client = MongoClient(

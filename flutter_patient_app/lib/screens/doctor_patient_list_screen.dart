@@ -418,7 +418,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
                         if (bloodType.isNotEmpty)
                           Row(
                             children: [
-                              const Icon(Icons.bloodtype, size: 14, color: AppColors.textSecondary),
+                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 'Blood Type: $bloodType',
@@ -459,7 +459,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
   }
 }
 
-                              const Icon(Icons.bloodtype, size: 14, color: AppColors.textSecondary),
+                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 'Blood Type: $bloodType',
@@ -500,7 +500,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
   }
 }
 
-                              const Icon(Icons.bloodtype, size: 14, color: AppColors.textSecondary),
+                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 'Blood Type: $bloodType',

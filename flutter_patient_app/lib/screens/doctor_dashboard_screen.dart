@@ -6,8 +6,6 @@ import '../services/api_service.dart';
 import '../utils/constants.dart';
 import 'doctor_patient_list_screen.dart';
 import 'doctor_appointments_screen.dart';
-import 'simple_doctor_profile_screen.dart';
-import 'simple_voice_recording_screen.dart';
 import 'add_patient_screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
@@ -339,14 +337,14 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
               ),
               const SizedBox(height: 12),
               
-              // Voice Dictation Button
-              _buildActionButton(
-                'Voice Dictation',
-                'Start voice recording and transcription',
-                Icons.mic,
-                Colors.orange,
-                () => _startVoiceDictation(),
-              ),
+              // Voice Dictation Button - REMOVED (voice functionality disabled)
+              // _buildActionButton(
+              //   'Voice Dictation',
+              //   'Start voice recording and transcription',
+              //   Icons.mic,
+              //   Colors.orange,
+              //   () => _startVoiceDictation(),
+              // ),
             ],
           ),
         );
@@ -548,124 +546,9 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     }
   }
 
-  Future<void> _startVoiceDictation() async {
-    try {
-      // Get doctor_id from auth provider
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final doctorId = authProvider.patientId; // doctor_id is stored in patientId field
-      
-      if (doctorId == null || doctorId.isEmpty) {
-        _showErrorSnackBar('Doctor ID not found. Please login again.');
-        return;
-      }
+  // Voice dictation method removed - functionality disabled
 
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Starting voice dictation...'),
-            ],
-          ),
-        ),
-      );
-
-      // Create a new voice conversation
-      final conversationData = {
-        'patient_id': doctorId, // Using doctor_id as patient_id for voice conversations
-        'title': 'Voice Dictation Session',
-        'language': 'en',
-        'is_active': true,
-        'duration_seconds': 0.0,
-      };
-
-      final response = await _apiService.createVoiceConversation(conversationData);
-      
-      // Close loading dialog
-      Navigator.of(context).pop();
-
-      if (response.containsKey('error')) {
-        _showErrorSnackBar('Failed to start voice dictation: ${response['error']}');
-        return;
-      }
-
-      final conversationId = response['conversation_id'];
-      
-      // Show success message and navigate to voice dictation screen
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Voice dictation started! Conversation ID: $conversationId'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-
-      // TODO: Navigate to voice dictation screen
-      // For now, show a dialog with conversation details
-      _showVoiceDictationDialog(conversationId, response['conversation']);
-
-    } catch (e) {
-      // Close loading dialog if it's open
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-      print('❌ Error starting voice dictation: $e');
-      _showErrorSnackBar('Error starting voice dictation: $e');
-    }
-  }
-
-  void _showVoiceDictationDialog(String conversationId, Map<String, dynamic> conversation) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Voice Dictation Started'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Conversation ID: $conversationId'),
-            const SizedBox(height: 8),
-            Text('Title: ${conversation['title']}'),
-            const SizedBox(height: 8),
-            Text('Language: ${conversation['language']}'),
-            const SizedBox(height: 8),
-            Text('Status: ${conversation['is_active'] ? 'Active' : 'Inactive'}'),
-            const SizedBox(height: 16),
-            const Text(
-              'Voice dictation is ready! You can now start recording audio and it will be transcribed in real-time.',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Navigate to enhanced voice recording screen
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SimpleVoiceRecordingScreen(
-                    conversationId: conversationId,
-                    conversationTitle: conversation['title'],
-                  ),
-                ),
-              );
-            },
-            child: const Text('Start Recording'),
-          ),
-        ],
-      ),
-    );
-  }
+  // Voice dictation dialog removed - functionality disabled
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
