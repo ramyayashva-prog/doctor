@@ -24,10 +24,8 @@ from controllers.auth_controller import AuthController
 from controllers.doctor_controller import DoctorController
 from controllers.patient_controller import PatientController
 from controllers.otp_controller import OTPController
-from controllers.voice_controller import VoiceController
 from services.email_service import EmailService
 from services.jwt_service import JWTService
-from services.voice_service import VoiceService
 from utils.validators import Validators
 from utils.helpers import Helpers
 
@@ -53,7 +51,7 @@ db.connect()
 
 email_service = EmailService()
 jwt_service = JWTService()
-voice_service = VoiceService()
+# voice_service = VoiceService()  # Removed voice functionality
 validators = Validators()
 helpers = Helpers()
 
@@ -67,7 +65,7 @@ auth_controller = AuthController(doctor_model, patient_model, otp_model, jwt_ser
 doctor_controller = DoctorController(doctor_model, jwt_service, validators)
 patient_controller = PatientController()
 otp_controller = OTPController(otp_model, jwt_service, email_service, validators)
-voice_controller = VoiceController()
+# voice_controller = VoiceController()  # Removed voice functionality
 
 # Routes
 @app.route('/health', methods=['GET'])
@@ -249,128 +247,8 @@ def doctor_login():
     """Doctor-only login endpoint"""
     return auth_controller.doctor_login(request)
 
-# Voice Dictation Routes
-@app.route('/voice/conversations', methods=['POST'])
-def create_voice_conversation():
-    """Create a new voice conversation"""
-    data = request.get_json()
-    return voice_controller.create_conversation(request, data)
-
-@app.route('/voice/conversations/<conversation_id>', methods=['GET'])
-def get_voice_conversation(conversation_id):
-    """Get voice conversation by ID"""
-    return voice_controller.get_conversation(request, conversation_id)
-
-@app.route('/voice/conversations/patient/<patient_id>', methods=['GET'])
-def get_patient_voice_conversations(patient_id):
-    """Get all voice conversations for a patient"""
-    return voice_controller.get_patient_conversations(request, patient_id)
-
-@app.route('/voice/conversations/<conversation_id>', methods=['PUT'])
-def update_voice_conversation(conversation_id):
-    """Update voice conversation"""
-    data = request.get_json()
-    return voice_controller.update_conversation(request, conversation_id, data)
-
-@app.route('/voice/conversations/<conversation_id>', methods=['DELETE'])
-def delete_voice_conversation(conversation_id):
-    """Delete voice conversation"""
-    return voice_controller.delete_conversation(request, conversation_id)
-
-@app.route('/voice/transcriptions', methods=['POST'])
-def create_voice_transcription():
-    """Create a new voice transcription"""
-    data = request.get_json()
-    return voice_controller.create_transcription(request, data)
-
-@app.route('/voice/transcriptions/<transcription_id>', methods=['GET'])
-def get_voice_transcription(transcription_id):
-    """Get voice transcription by ID"""
-    return voice_controller.get_transcription(request, transcription_id)
-
-@app.route('/voice/transcriptions/conversation/<conversation_id>', methods=['GET'])
-def get_conversation_transcriptions(conversation_id):
-    """Get all transcriptions for a conversation"""
-    return voice_controller.get_conversation_transcriptions(request, conversation_id)
-
-@app.route('/voice/transcriptions/conversation/<conversation_id>/final', methods=['GET'])
-def get_final_transcriptions(conversation_id):
-    """Get only final transcriptions for a conversation"""
-    return voice_controller.get_final_transcriptions(request, conversation_id)
-
-@app.route('/voice/transcriptions/<transcription_id>', methods=['PUT'])
-def update_voice_transcription(transcription_id):
-    """Update voice transcription"""
-    data = request.get_json()
-    return voice_controller.update_transcription(request, transcription_id, data)
-
-@app.route('/voice/transcriptions/<transcription_id>', methods=['DELETE'])
-def delete_voice_transcription(transcription_id):
-    """Delete voice transcription"""
-    return voice_controller.delete_transcription(request, transcription_id)
-
-@app.route('/voice/process-audio', methods=['POST'])
-def process_audio_chunk():
-    """Process audio chunk and return transcription"""
-    try:
-        data = request.get_json()
-        conversation_id = data.get('conversation_id')
-        chunk_index = data.get('chunk_index', 0)
-        audio_data = data.get('audio_data')
-        
-        if not conversation_id or not audio_data:
-            return jsonify({'error': 'Missing required fields: conversation_id, audio_data'}), 400
-        
-        # Process the audio chunk
-        result, status_code = voice_controller.process_audio_chunk(request, audio_data, conversation_id, chunk_index)
-        
-        # Add additional metadata for better tracking
-        if status_code == 200 and 'transcription' in result:
-            result['transcription']['processing_timestamp'] = datetime.now().isoformat()
-            result['transcription']['chunk_index'] = chunk_index
-            result['transcription']['conversation_id'] = conversation_id
-        
-        return jsonify(result), status_code
-        
-    except Exception as e:
-        return jsonify({'error': f'Audio processing failed: {str(e)}'}), 500
-
-@app.route('/voice/conversations/<conversation_id>/summary', methods=['GET'])
-def get_conversation_summary(conversation_id):
-    """Get conversation summary with statistics"""
-    summary = voice_service.get_conversation_summary(conversation_id)
-    if 'error' in summary:
-        return jsonify(summary), 404
-    return jsonify(summary), 200
-
-@app.route('/voice/conversations/<conversation_id>/status', methods=['GET'])
-def get_conversation_status(conversation_id):
-    """Get real-time conversation status and transcription progress"""
-    try:
-        # Get conversation details
-        conversation_result, conv_status = voice_controller.get_conversation(request, conversation_id)
-        if conv_status != 200:
-            return jsonify({'error': 'Conversation not found'}), 404
-        
-        # Get transcriptions count
-        transcriptions_result, trans_status = voice_controller.get_conversation_transcriptions(request, conversation_id)
-        transcription_count = len(transcriptions_result.get('transcriptions', [])) if trans_status == 200 else 0
-        
-        # Get final transcriptions count
-        final_result, final_status = voice_controller.get_final_transcriptions(request, conversation_id)
-        final_count = len(final_result.get('transcriptions', [])) if final_status == 200 else 0
-        
-        return jsonify({
-            'conversation_id': conversation_id,
-            'status': 'active' if conversation_result.get('conversation', {}).get('is_active', False) else 'inactive',
-            'transcription_count': transcription_count,
-            'final_transcription_count': final_count,
-            'last_updated': datetime.now().isoformat(),
-            'ready_for_recording': True
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': f'Failed to get conversation status: {str(e)}'}), 500
+# Voice Dictation Routes - REMOVED (voice functionality disabled)
+# All voice-related endpoints have been removed to fix deployment issues
 
 # Error Handlers
 @app.errorhandler(404)
