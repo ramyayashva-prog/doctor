@@ -1,0 +1,10 @@
+# Emergency minimal requirements for Render deployment
+Flask==3.0.3
+Flask-CORS==4.0.1
+gunicorn==22.0.0
+pymongo==4.8.0
+PyJWT==2.9.0
+python-dotenv==1.0.1
+requests==2.32.3
+openai==1.35.0
+setuptools==69.0.3

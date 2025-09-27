@@ -17,6 +17,7 @@ openai==1.35.0
 
 # RSA for JWT signing (required by your JWT service)
 rsa==4.9
+cryptography==41.0.8
 
 # Build tools - CRITICAL for Render
 setuptools==69.0.3
