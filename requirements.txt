@@ -1,0 +1,50 @@
+# Core Flask dependencies
+Flask==3.0.3
+Flask-CORS==4.0.1
+Werkzeug==3.0.3
+gunicorn==22.0.0
+
+# Database and Auth
+pymongo==4.8.0
+bcrypt==4.1.3
+PyJWT==2.9.0
+
+# Utility packages
+python-dateutil==2.9.0
+python-dotenv==1.0.1
+requests==2.32.3
+openai==1.35.0
+
+# For async operations (if needed)
+aiohttp==3.9.5
+
+# Basic image processing (lighter than OpenCV)
+pillow==10.4.0
+
+# Document processing (optional - can be removed if causing issues)
+PyPDF2==3.0.1
+python-docx==1.1.2
+
+# Voice Dictation Dependencies
+# Audio Processing
+pydub==0.25.1
+numpy==1.24.3
+scipy==1.11.4
+
+# Google Cloud Speech-to-Text for real-time transcription
+google-cloud-speech==2.21.0
+
+# ElevenLabs Integration (optional)
+elevenlabs==0.2.26
+
+# File Handling
+aiofiles==23.2.1
+
+# Additional Security
+python-magic==0.4.27
+
+# Optional: FastAPI components (if you need them)
+# fastapi==0.111.0
+# uvicorn[standard]==0.30.1
+# python-multipart==0.0.9
+# pydantic-settings==2.3.4
