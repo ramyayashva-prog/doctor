@@ -1,9 +1,8 @@
 """
-JWT Service - Handles JWT token operations
+JWT Service - Handles JWT token operations with HMAC (simplified for deployment)
 """
 
 import jwt
-import rsa
 import os
 import time
 import secrets
@@ -12,41 +11,14 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 class JWTService:
-    """JWT service for token operations"""
+    """JWT service for token operations using HMAC"""
     
     def __init__(self):
-        self.private_key = None
-        self.public_key = None
-        self.algorithm = 'RS256'
-        self._load_or_generate_keys()
+        # Use environment variable or generate a secret key
+        self.secret_key = os.getenv('JWT_SECRET_KEY', 'your-secret-key-change-this')
+        self.algorithm = 'HS256'  # HMAC instead of RSA
     
-    def _load_or_generate_keys(self):
-        """Load existing RSA keys or generate new ones"""
-        try:
-            # Try to load existing keys
-            if os.path.exists('jwt_private_key.pem') and os.path.exists('jwt_public_key.pem'):
-                with open('jwt_private_key.pem', 'rb') as f:
-                    self.private_key = rsa.PrivateKey.load_pkcs1(f.read())
-                with open('jwt_public_key.pem', 'rb') as f:
-                    self.public_key = rsa.PublicKey.load_pkcs1(f.read())
-                print("🔑 Loading existing RSA keys from files...")
-                print("✅ RSA keys loaded from files")
-            else:
-                # Generate new keys
-                print("🔑 Generating new RSA keys...")
-                self.public_key, self.private_key = rsa.newkeys(2048)
-                
-                # Save keys to files
-                with open('jwt_private_key.pem', 'wb') as f:
-                    f.write(self.private_key.save_pkcs1())
-                with open('jwt_public_key.pem', 'wb') as f:
-                    f.write(self.public_key.save_pkcs1())
-                print("✅ RSA keys generated and saved to files")
-                
-        except Exception as e:
-            print(f"❌ Error loading/generating RSA keys: {e}")
-            # Generate new keys as fallback
-            self.public_key, self.private_key = rsa.newkeys(2048)
+    # No need for key loading with HMAC - using secret key instead
     
     def generate_otp_jwt(self, email: str, purpose: str, signup_data: Dict[str, Any]) -> tuple[str, str]:
         """Generate JWT token with OTP"""
@@ -69,11 +41,8 @@ class JWTService:
                 'signup_data': signup_data
             }
             
-            # Convert RSA key to PEM format
-            private_key_pem = self.private_key.save_pkcs1().decode('utf-8')
-            
-            # Generate JWT token
-            jwt_token = jwt.encode(payload, private_key_pem, algorithm=self.algorithm)
+            # Generate JWT token using HMAC
+            jwt_token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
             
             print(f"🔐 OTP JWT created for {email}: {otp}")
             print(f"🔐 Generated new OTP: {otp} for email: {email}")
@@ -87,15 +56,12 @@ class JWTService:
     def verify_otp_jwt(self, jwt_token: str, email: str, otp: str) -> Dict[str, Any]:
         """Verify OTP JWT token"""
         try:
-            # Convert RSA key to PEM format
-            public_key_pem = self.public_key.save_pkcs1().decode('utf-8')
-            
-            # Decode JWT token
-            payload = jwt.decode(jwt_token, public_key_pem, algorithms=[self.algorithm])
+            # Decode JWT token using HMAC
+            payload = jwt.decode(jwt_token, self.secret_key, algorithms=[self.algorithm])
             
             print(f"🔍 JWT Verification Debug:")
             print(f"  JWT Token: {jwt_token[:50]}...")
-            print(f"  Public Key: {public_key_pem[:50]}...")
+            print(f"  Algorithm: {self.algorithm}")
             print(f"  Decoded payload: {payload}")
             
             # Check token type
@@ -224,11 +190,8 @@ class JWTService:
     def verify_access_token(self, token: str) -> Dict[str, Any]:
         """Verify access token"""
         try:
-            # Convert RSA key to PEM format
-            public_key_pem = self.public_key.save_pkcs1().decode('utf-8')
-            
-            # Decode JWT token
-            payload = jwt.decode(token, public_key_pem, algorithms=[self.algorithm])
+            # Decode JWT token using HMAC
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             
             # Check token type
             if payload.get('type') != 'access_token':
@@ -277,11 +240,8 @@ class JWTService:
                 'type': 'access_token'
             }
             
-            # Convert RSA key to PEM format
-            private_key_pem = self.private_key.save_pkcs1().decode('utf-8')
-            
-            # Generate JWT token
-            jwt_token = jwt.encode(payload, private_key_pem, algorithm=self.algorithm)
+            # Generate JWT token using HMAC
+            jwt_token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
             
             print(f"🔑 JWT token generated for {token_data.get('email', 'unknown')}")
             return jwt_token
