@@ -273,7 +273,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                                     GestureDetector(
                                       onTap: () {
                                         // TODO: Open profile URL in browser
-                                        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             content: Text('Profile URL: ${_profileData!['profile_url']}'),
                                             backgroundColor: AppColors.info,
@@ -282,32 +282,32 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
+                              decoration: BoxDecoration(
                                           color: Colors.white.withOpacity(0.2),
                                           borderRadius: BorderRadius.circular(20),
-                                        ),
+                              ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
-                                          children: [
+                                children: [
                                             const Icon(
                                               Icons.link,
                                               size: 16,
-                                              color: Colors.white70,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              'View Profile',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.white70,
-                                                decoration: TextDecoration.underline,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      color: Colors.white70,
                                     ),
-                                  ],
+                                            const SizedBox(width: 4),
+                                  Text(
+                                              'View Profile',
+                                    style: const TextStyle(
+                                                fontSize: 12,
+                                      color: Colors.white70,
+                                                decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                                  ),
+                                ),
+                              ],
                                 ],
                               ),
                             ),

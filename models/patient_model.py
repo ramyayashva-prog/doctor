@@ -100,7 +100,7 @@ class PatientModel:
                 patient['_id'] = str(patient['_id'])
             
             return patients
-            
+                
         except Exception as e:
             logger.error(f"Error getting all patients: {str(e)}")
             return []
@@ -170,8 +170,8 @@ class PatientModel:
                     return False
             else:
                 logger.error(f"Patient not found: {patient_id}")
-                return False
-                
+            return False
+    
         except Exception as e:
             logger.error(f"Error deleting patient {patient_id}: {str(e)}")
             return False

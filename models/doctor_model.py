@@ -374,16 +374,32 @@ class DoctorModel:
                 doctor = self.collection.find_one({'doctor_id': identifier})
             
             if not doctor or 'password_hash' not in doctor:
+                print(f"❌ Doctor not found or no password_hash for: {identifier}")
                 return False
             
             import bcrypt
-            # password_hash is already bytes, no need to encode again
+            # Get the stored password hash
             password_hash = doctor['password_hash']
+            
+            # Debug information
+            print(f"🔍 Password verification debug:")
+            print(f"   Identifier: {identifier}")
+            print(f"   Password hash type: {type(password_hash)}")
+            print(f"   Password hash length: {len(password_hash) if password_hash else 0}")
+            print(f"   Input password: {password}")
+            
+            # Convert password_hash to bytes if it's a string
             if isinstance(password_hash, str):
                 password_hash = password_hash.encode('utf-8')
-            return bcrypt.checkpw(password.encode('utf-8'), password_hash)
+            
+            # Verify password
+            is_valid = bcrypt.checkpw(password.encode('utf-8'), password_hash)
+            print(f"   Password verification result: {is_valid}")
+            
+            return is_valid
+            
         except Exception as e:
-            print(f"Error verifying password: {e}")
-            return False
-            return False
+            print(f"❌ Error verifying password: {e}")
+            import traceback
+            traceback.print_exc()
             return False
