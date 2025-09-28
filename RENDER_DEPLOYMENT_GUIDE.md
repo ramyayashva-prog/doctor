@@ -94,31 +94,68 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/doctor_db
 # Authentication
 JWT_SECRET_KEY=your_super_secret_jwt_key_here
 
-# OpenAI (for AI summaries)
+# OpenAI (for AI summaries) - REQUIRED FOR AI SUMMARY ENDPOINTS
 OPENAI_API_KEY=sk-your_openai_api_key_here
 
 # Server
 PORT=5000
 ```
 
+### **🚨 IMPORTANT: OpenAI API Key Setup**
+
+If you're getting `"Failed to generate AI summary"` errors, you need to configure the OpenAI API key:
+
+#### **Step 1: Get OpenAI API Key**
+1. Go to [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+2. Create a new API key
+3. Copy the key (starts with `sk-`)
+
+#### **Step 2: Configure in Render Dashboard**
+1. **Go to your Render service dashboard**
+2. **Click "Environment" tab**
+3. **Find `OPENAI_API_KEY` in the list**
+4. **Click "Edit" and paste your API key**
+5. **Click "Save Changes"**
+6. **Service will auto-redeploy**
+
+#### **Step 3: Test AI Summary Endpoint**
+```bash
+# Test with your deployed URL
+curl -X GET "https://your-app-name.onrender.com/doctor/patient/PATIENT_ID/ai-summary" \
+  -H "Authorization: Bearer YOUR_AUTH_TOKEN"
+```
+
 ## 🚨 **Common Issues & Solutions:**
 
-### **1. Build Still Fails**
+### **1. "Failed to generate AI summary" Error**
+- **Cause**: OpenAI API key not configured in Render environment variables
+- **Solution**: 
+  1. Go to Render Dashboard > Your Service > Environment
+  2. Find `OPENAI_API_KEY` and set your OpenAI API key
+  3. Redeploy the service
+- **Test**: Use the AI Summary Postman collection to verify
+
+### **2. Build Still Fails**
 - **Solution**: Use `requirements-minimal.txt` instead of `requirements.txt`
 - **Remove**: Any local file dependencies
 
-### **2. Database Connection Error**
+### **3. Database Connection Error**
 - **Check**: MongoDB URI format
 - **Verify**: Network access in MongoDB Atlas
 - **Test**: Connection string locally first
 
-### **3. Import Errors**
+### **4. Import Errors**
 - **Solution**: Ensure all imports are in the minimal requirements
 - **Check**: No local file imports in your code
 
-### **4. Port Issues**
+### **5. Port Issues**
 - **Solution**: Use `$PORT` environment variable (Render sets this automatically)
 - **Check**: Start command uses `0.0.0.0:$PORT`
+
+### **6. OpenAI API Errors**
+- **"Insufficient quota"**: Add payment method to OpenAI account
+- **"Invalid API key"**: Verify API key format (starts with `sk-`)
+- **"Rate limit exceeded"**: Implement request throttling
 
 ## 📝 **Testing Your Deployment:**
 

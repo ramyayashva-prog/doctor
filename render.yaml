@@ -18,6 +18,9 @@ services:
         generateValue: true
       - key: OPENAI_API_KEY
         sync: false
+        # IMPORTANT: Set this value in Render Dashboard Environment tab
+        # Go to: Render Dashboard > Your Service > Environment > OPENAI_API_KEY
+        # Value should be: sk-your-openai-api-key-here
     healthCheckPath: /health
     plan: free
 
