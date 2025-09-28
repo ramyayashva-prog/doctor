@@ -135,6 +135,13 @@ def test_openai_api():
         import os
         from openai import OpenAI
         
+        # Check OpenAI library version
+        try:
+            import openai
+            openai_version = openai.__version__
+        except:
+            openai_version = "Unknown"
+        
         # Get API key
         api_key = os.getenv('OPENAI_API_KEY')
         
@@ -142,38 +149,77 @@ def test_openai_api():
             return jsonify({
                 'success': False,
                 'error': 'OPENAI_API_KEY not found in environment variables',
-                'message': 'Please set OPENAI_API_KEY in your environment'
+                'message': 'Please set OPENAI_API_KEY in your environment',
+                'openai_version': openai_version
             }), 400
         
         if not api_key.startswith('sk-'):
             return jsonify({
                 'success': False,
                 'error': 'Invalid API key format (should start with sk-)',
-                'message': 'Please check your OpenAI API key'
+                'message': 'Please check your OpenAI API key',
+                'openai_version': openai_version
             }), 400
         
-        # Initialize OpenAI client with minimal configuration for Render
+        # Initialize OpenAI client with version compatibility
         try:
-            # Use minimal initialization to avoid proxy issues
-            client = OpenAI(api_key=api_key)
+            # Try different initialization methods based on OpenAI library version
+            try:
+                # Method 1: Minimal initialization (newer versions)
+                client = OpenAI(api_key=api_key)
+                print('✅ OpenAI client initialized with minimal config')
+            except Exception as e1:
+                print(f'⚠️ Method 1 failed: {e1}')
+                try:
+                    # Method 2: With explicit parameters (older versions)
+                    client = OpenAI(
+                        api_key=api_key,
+                        timeout=30.0
+                    )
+                    print('✅ OpenAI client initialized with explicit config')
+                except Exception as e2:
+                    print(f'⚠️ Method 2 failed: {e2}')
+                    # Method 3: Legacy initialization
+                    import openai
+                    openai.api_key = api_key
+                    client = openai
+                    print('✅ OpenAI client initialized with legacy method')
         except Exception as client_error:
             return jsonify({
                 'success': False,
                 'error': f'Failed to initialize OpenAI client: {str(client_error)}',
-                'message': 'OpenAI client initialization failed'
+                'message': 'OpenAI client initialization failed',
+                'error_type': type(client_error).__name__
             }), 500
         
-        # Test API connection with a simple request
+        # Test API connection with version compatibility
         try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
-                ],
-                max_tokens=50,
-                temperature=0.3
-            )
+            # Try modern API call first
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
+                    ],
+                    max_tokens=50,
+                    temperature=0.3
+                )
+                print('✅ Modern API call successful')
+            except Exception as modern_error:
+                print(f'⚠️ Modern API failed: {modern_error}')
+                # Try legacy API call
+                response = client.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
+                    ],
+                    max_tokens=50,
+                    temperature=0.3
+                )
+                print('✅ Legacy API call successful')
+                
         except Exception as api_error:
             return jsonify({
                 'success': False,
@@ -187,7 +233,8 @@ def test_openai_api():
             'openai_response': response.choices[0].message.content,
             'model_used': response.model,
             'tokens_used': response.usage.total_tokens,
-            'message': 'OpenAI API test successful'
+            'message': 'OpenAI API test successful',
+            'openai_version': openai_version
         }), 200
         
     except Exception as e:

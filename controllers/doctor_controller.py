@@ -415,11 +415,29 @@ DETAILED HEALTH INFORMATION:
             
             print(f'✅ OpenAI API key found: {api_key[:10]}...{api_key[-4:]}')
             
-            # Initialize OpenAI client with minimal configuration for Render
+            # Initialize OpenAI client with version compatibility
             try:
-                # Use minimal initialization to avoid proxy issues
-                client = OpenAI(api_key=api_key)
-                print('✅ OpenAI client initialized successfully')
+                # Try different initialization methods based on OpenAI library version
+                try:
+                    # Method 1: Minimal initialization (newer versions)
+                    client = OpenAI(api_key=api_key)
+                    print('✅ OpenAI client initialized with minimal config')
+                except Exception as e1:
+                    print(f'⚠️ Method 1 failed: {e1}')
+                    try:
+                        # Method 2: With explicit parameters (older versions)
+                        client = OpenAI(
+                            api_key=api_key,
+                            timeout=30.0
+                        )
+                        print('✅ OpenAI client initialized with explicit config')
+                    except Exception as e2:
+                        print(f'⚠️ Method 2 failed: {e2}')
+                        # Method 3: Legacy initialization
+                        import openai
+                        openai.api_key = api_key
+                        client = openai
+                        print('✅ OpenAI client initialized with legacy method')
             except Exception as client_error:
                 print(f'❌ Failed to initialize OpenAI client: {client_error}')
                 print(f'   Error type: {type(client_error).__name__}')
@@ -443,18 +461,34 @@ Patient Data:
 Please provide a clear, professional medical summary suitable for a doctor's review.
 """
             
-            # Call OpenAI API with comprehensive error handling
+            # Call OpenAI API with version compatibility
             try:
                 print('📡 Making OpenAI API request...')
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    max_tokens=1000,
-                    temperature=0.3
-                )
+                # Try modern API call first
+                try:
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        max_tokens=1000,
+                        temperature=0.3
+                    )
+                    print('✅ Modern API call successful')
+                except Exception as modern_error:
+                    print(f'⚠️ Modern API failed: {modern_error}')
+                    # Try legacy API call
+                    response = client.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        max_tokens=1000,
+                        temperature=0.3
+                    )
+                    print('✅ Legacy API call successful')
                 
                 print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')
                 print(f'✅ Model used: {response.model}')
