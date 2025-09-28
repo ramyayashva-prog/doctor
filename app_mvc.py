@@ -68,6 +68,25 @@ otp_controller = OTPController(otp_model, jwt_service, email_service, validators
 # voice_controller = VoiceController()  # Removed voice functionality
 
 # Routes
+@app.route('/', methods=['GET'])
+def root_endpoint():
+    """Root endpoint with API information"""
+    return jsonify({
+        'message': 'Doctor Patient Management API',
+        'version': '1.0.0',
+        'status': 'running',
+        'timestamp': datetime.now().isoformat(),
+        'endpoints': {
+            'health': '/health',
+            'patients': '/patients',
+            'doctors': '/doctors',
+            'auth': '/doctor-login',
+            'ai_summary': '/doctor/patient/{patient_id}/ai-summary',
+            'debug': '/debug/openai-config'
+        },
+        'documentation': 'See API documentation for detailed endpoint usage'
+    })
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -133,19 +152,35 @@ def test_openai_api():
                 'message': 'Please check your OpenAI API key'
             }), 400
         
-        # Initialize OpenAI client
-        client = OpenAI(api_key=api_key)
+        # Initialize OpenAI client with minimal configuration for Render
+        try:
+            # Use minimal initialization to avoid proxy issues
+            client = OpenAI(api_key=api_key)
+        except Exception as client_error:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to initialize OpenAI client: {str(client_error)}',
+                'message': 'OpenAI client initialization failed'
+            }), 500
         
         # Test API connection with a simple request
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
-            ],
-            max_tokens=50,
-            temperature=0.3
-        )
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
+                ],
+                max_tokens=50,
+                temperature=0.3
+            )
+        except Exception as api_error:
+            return jsonify({
+                'success': False,
+                'error': f'OpenAI API call failed: {str(api_error)}',
+                'message': 'OpenAI API test failed',
+                'error_type': type(api_error).__name__
+            }), 500
         
         return jsonify({
             'success': True,

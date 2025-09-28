@@ -400,7 +400,6 @@ DETAILED HEALTH INFORMATION:
             from openai import OpenAI
             
             # Get OpenAI API key from environment variables
-            # This works for both local (.env file) and Render (environment variables)
             api_key = os.getenv('OPENAI_API_KEY')
             
             if not api_key:
@@ -416,8 +415,15 @@ DETAILED HEALTH INFORMATION:
             
             print(f'✅ OpenAI API key found: {api_key[:10]}...{api_key[-4:]}')
             
-            # Initialize OpenAI client
-            client = OpenAI(api_key=api_key)
+            # Initialize OpenAI client with minimal configuration for Render
+            try:
+                # Use minimal initialization to avoid proxy issues
+                client = OpenAI(api_key=api_key)
+                print('✅ OpenAI client initialized successfully')
+            except Exception as client_error:
+                print(f'❌ Failed to initialize OpenAI client: {client_error}')
+                print(f'   Error type: {type(client_error).__name__}')
+                return None
             
             print('🤖 Sending data to OpenAI for summarization...')
             
@@ -437,8 +443,9 @@ Patient Data:
 Please provide a clear, professional medical summary suitable for a doctor's review.
 """
             
-            # Call OpenAI API with error handling
+            # Call OpenAI API with comprehensive error handling
             try:
+                print('📡 Making OpenAI API request...')
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
@@ -446,24 +453,32 @@ Please provide a clear, professional medical summary suitable for a doctor's rev
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=1000,
-                    temperature=0.3,
-                    timeout=30  # Add timeout to prevent hanging
+                    temperature=0.3
                 )
                 
                 print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')
+                print(f'✅ Model used: {response.model}')
                 return response.choices[0].message.content
                 
             except Exception as openai_error:
                 print(f'❌ OpenAI API call failed: {openai_error}')
                 print(f'   Error type: {type(openai_error).__name__}')
+                print(f'   Error details: {str(openai_error)}')
                 
                 # Handle specific OpenAI errors
-                if "insufficient_quota" in str(openai_error).lower():
+                error_str = str(openai_error).lower()
+                if "insufficient_quota" in error_str:
                     print('💡 OpenAI API quota exceeded - check your billing')
-                elif "invalid_api_key" in str(openai_error).lower():
+                elif "invalid_api_key" in error_str or "authentication" in error_str:
                     print('💡 Invalid API key - verify your OpenAI API key')
-                elif "rate_limit" in str(openai_error).lower():
+                elif "rate_limit" in error_str:
                     print('💡 Rate limit exceeded - try again later')
+                elif "timeout" in error_str:
+                    print('💡 Request timeout - OpenAI API may be slow')
+                elif "connection" in error_str:
+                    print('💡 Connection error - check network connectivity')
+                else:
+                    print(f'💡 Unknown OpenAI error: {error_str}')
                 
                 return None
             
@@ -474,6 +489,7 @@ Please provide a clear, professional medical summary suitable for a doctor's rev
         except Exception as e:
             print(f'❌ Unexpected error with OpenAI API: {e}')
             print(f'   Error type: {type(e).__name__}')
+            print(f'   Error details: {str(e)}')
             return None
     
     def get_appointments(self, request) -> tuple:
