@@ -139,22 +139,22 @@ class _DoctorProfileCompletionScreenState extends State<DoctorProfileCompletionS
       print('  License Number: ${_licenseNumberController.text.trim()}');
       print('  Languages: $_selectedLanguages');
       
-      final result = await apiService.completeDoctorProfile(
-        doctorId: doctorId,
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        specialization: _selectedSpecialization,
-        licenseNumber: _licenseNumberController.text.trim(),
-        experienceYears: int.tryParse(_experienceController.text.trim()) ?? 0,
-        hospitalName: _hospitalController.text.trim(),
-        address: _addressController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
-        pincode: _pincodeController.text.trim(),
-        consultationFee: int.tryParse(_consultationFeeController.text.trim()) ?? 0,
-        languages: _selectedLanguages,
-        qualifications: [], // Add qualifications if needed
-      );
+      final result = await apiService.completeDoctorProfile({
+        'doctor_id': doctorId,
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'specialization': _selectedSpecialization,
+        'license_number': _licenseNumberController.text.trim(),
+        'experience_years': int.tryParse(_experienceController.text.trim()) ?? 0,
+        'hospital_name': _hospitalController.text.trim(),
+        'address': _addressController.text.trim(),
+        'city': _cityController.text.trim(),
+        'state': _stateController.text.trim(),
+        'pincode': _pincodeController.text.trim(),
+        'consultation_fee': int.tryParse(_consultationFeeController.text.trim()) ?? 0,
+        'languages': _selectedLanguages,
+        'qualifications': [], // Add qualifications if needed
+      });
       
       print('🔍 API Response: $result');
       
@@ -167,8 +167,8 @@ class _DoctorProfileCompletionScreenState extends State<DoctorProfileCompletionS
             ),
           );
           
-          // Navigate to doctor login page
-          Navigator.pushReplacementNamed(context, '/login', arguments: 'doctor');
+          // Navigate to doctor dashboard
+          Navigator.pushReplacementNamed(context, '/doctor-dashboard');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -447,7 +447,7 @@ class _DoctorProfileCompletionScreenState extends State<DoctorProfileCompletionS
                           }
                         });
                       },
-                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      selectedColor: AppColors.primary.withValues(alpha: 0.2),
                       checkmarkColor: AppColors.primary,
                     );
                   }).toList(),

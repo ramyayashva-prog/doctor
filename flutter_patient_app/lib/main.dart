@@ -25,9 +25,9 @@ import 'utils/constants.dart';
 import 'screens/patient_kick_counter_screen.dart';
 import 'screens/doctor_dashboard_screen.dart';
 import 'screens/doctor_patient_list_screen.dart';
-import 'screens/doctor_patient_detail_screen.dart';
 import 'screens/doctor_appointments_screen.dart';
 import 'screens/doctor_profile_completion_screen.dart';
+import 'screens/doctor_profile_screen.dart';
 
 void main() {
   runApp(const PatientAlertApp());
@@ -159,6 +159,7 @@ class PatientAlertApp extends StatelessWidget {
           },
           '/profile-completion': (context) => const ProfileCompletionScreen(),
           '/doctor-profile-completion': (context) => const DoctorProfileCompletionScreen(),
+          '/doctor-profile': (context) => const DoctorProfileScreen(),
         },
         debugShowCheckedModeBanner: false,
       ),

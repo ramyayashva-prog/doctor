@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
-import '../services/enhanced_voice_service.dart';
 import '../utils/constants.dart';
 import '../utils/date_utils.dart';
 
@@ -25,8 +24,7 @@ class _PatientSymptomsTrackingScreenState extends State<PatientSymptomsTrackingS
   final TextEditingController _severityController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   
-  // Voice recording related variables
-  final EnhancedVoiceService _voiceService = EnhancedVoiceService();
+  // Voice recording related variables - DISABLED
   bool _isRecording = false;
   bool _isTranscribing = false;
   String _transcribedText = '';
@@ -212,157 +210,37 @@ class _PatientSymptomsTrackingScreenState extends State<PatientSymptomsTrackingS
     }
   }
 
-  // Voice recording methods for symptom transcription
+  // Voice recording methods for symptom transcription - DISABLED
   Future<void> _startVoiceRecording() async {
-    try {
-      setState(() {
-        _isRecording = true;
-      });
-      
-      final success = await _voiceService.startRecording();
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎤 Voice recording started... Describe your symptoms now!'),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        setState(() {
-          _isRecording = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Failed to start recording'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isRecording = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🎤 Voice recording is not available'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _stopVoiceRecording() async {
-    try {
-      setState(() {
-        _isRecording = false;
-      });
-      
-      final success = await _voiceService.stopRecording();
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('⏹️ Recording stopped. Transcribing symptoms...'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // Transcribe the recorded audio
-        await _transcribeSymptomsAudio();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Failed to stop recording'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('⏹️ Voice recording is not available'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
-  // Transcribe audio and populate symptoms field
-  Future<void> _transcribeSymptomsAudio() async {
-    try {
-      setState(() {
-        _isTranscribing = true;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🔤 Transcribing your symptoms...'),
-          backgroundColor: Colors.blue,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      
-      final transcription = await _voiceService.transcribeAudio();
-      
-      if (transcription != null) {
-        setState(() {
-          _transcribedText = transcription;
-          // Automatically populate the symptoms input field with transcribed text
-          _symptomController.text = transcription;
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Symptoms transcribed: $transcription'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Transcription failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isTranscribing = false;
-      });
-    }
-  }
 
-  // Test audio recording functionality
+  // Test audio recording functionality - DISABLED
   Future<void> _testAudioRecording() async {
-    try {
-      final result = await _voiceService.testAudioRecording();
-      if (result != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result),
-            backgroundColor: result.contains('✅') ? Colors.green : Colors.orange,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Test failed: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🎤 Voice recording functionality is currently disabled'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   // Test backend connectivity with detailed feedback

@@ -234,21 +234,22 @@ class _SimpleDoctorProfileScreenState extends State<SimpleDoctorProfileScreen> {
 
       print('🔍 Saving profile for doctor ID: $doctorId');
       
-      final response = await _apiService.updateDoctorProfile(
-        doctorId: doctorId,
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        specialization: _specializationController.text.trim(),
-        licenseNumber: _licenseController.text.trim(),
-        experienceYears: int.tryParse(_experienceController.text) ?? 0,
-        hospitalName: _hospitalController.text.trim(),
-        address: _addressController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
-        pincode: _pincodeController.text.trim(),
-        consultationFee: int.tryParse(_consultationFeeController.text) ?? 0,
-        profileUrl: _profileUrlController.text.trim(),
-      );
+      final profileData = {
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'specialization': _specializationController.text.trim(),
+        'licenseNumber': _licenseController.text.trim(),
+        'experienceYears': int.tryParse(_experienceController.text) ?? 0,
+        'hospitalName': _hospitalController.text.trim(),
+        'address': _addressController.text.trim(),
+        'city': _cityController.text.trim(),
+        'state': _stateController.text.trim(),
+        'pincode': _pincodeController.text.trim(),
+        'consultationFee': int.tryParse(_consultationFeeController.text) ?? 0,
+        'profileUrl': _profileUrlController.text.trim(),
+      };
+      
+      final response = await _apiService.updateDoctorProfile(doctorId, profileData);
       
       print('🔍 Update response: $response');
 
@@ -633,28 +634,6 @@ class _SimpleDoctorProfileScreenState extends State<SimpleDoctorProfileScreen> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-        filled: !enabled,
-        fillColor: enabled ? null : Colors.grey[100],
-      ),
-    );
-  }
-}
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-        filled: !enabled,
-        fillColor: enabled ? null : Colors.grey[100],
-      ),
-    );
-  }
-}
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

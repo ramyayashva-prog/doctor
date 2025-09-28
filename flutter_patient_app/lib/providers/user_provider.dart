@@ -33,22 +33,22 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.completeProfile(
-        patientId: patientId,
-        firstName: firstName,
-        lastName: lastName,
-        dateOfBirth: dateOfBirth,
-        bloodType: bloodType,
-        weight: weight,
-        height: height,
-        isPregnant: isPregnant,
-        lastPeriodDate: lastPeriodDate,
-        pregnancyWeek: pregnancyWeek,
-        expectedDeliveryDate: expectedDeliveryDate,
-        emergencyName: emergencyName,
-        emergencyRelationship: emergencyRelationship,
-        emergencyPhone: emergencyPhone,
-      );
+      final response = await _apiService.completeProfile({
+        'patientId': patientId,
+        'firstName': firstName,
+        'lastName': lastName,
+        'dateOfBirth': dateOfBirth,
+        'bloodType': bloodType,
+        'weight': weight,
+        'height': height,
+        'isPregnant': isPregnant,
+        'lastPeriodDate': lastPeriodDate,
+        'pregnancyWeek': pregnancyWeek,
+        'expectedDeliveryDate': expectedDeliveryDate,
+        'emergencyName': emergencyName,
+        'emergencyRelationship': emergencyRelationship,
+        'emergencyPhone': emergencyPhone,
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];

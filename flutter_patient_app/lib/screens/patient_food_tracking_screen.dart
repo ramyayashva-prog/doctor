@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../utils/constants.dart';
 import '../utils/date_utils.dart';
 import '../services/api_service.dart';
-import '../services/enhanced_voice_service.dart';
+// import '../services/enhanced_voice_service.dart'; // Removed - voice functionality not available
 // import 'detailed_food_entry_screen.dart'; // Removed as per edit hint
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -41,8 +41,8 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
   final TextEditingController _foodController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   
-  // Voice recording related variables
-  final EnhancedVoiceService _voiceService = EnhancedVoiceService();
+  // Voice recording related variables - DISABLED
+  // final EnhancedVoiceService _voiceService = EnhancedVoiceService();
   bool _isRecording = false;
   bool _isTranscribing = false;
   String _transcribedText = '';
@@ -101,44 +101,15 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
     });
   }
 
-  // Enhanced voice recording with translation support
+  // Enhanced voice recording with translation support - DISABLED
   Future<void> _startVoiceRecording() async {
-    try {
-      setState(() {
-        _isRecording = true;
-      });
-      
-      final success = await _voiceService.startRecording();
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎤 Voice recording started... Speak now!'),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        setState(() {
-          _isRecording = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Failed to start recording'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isRecording = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🎤 Voice recording is not available'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   // Test backend connectivity with detailed feedback
@@ -219,39 +190,13 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
   }
 
   Future<void> _stopVoiceRecording() async {
-    try {
-      setState(() {
-        _isRecording = false;
-      });
-      
-      final success = await _voiceService.stopRecording();
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('⏹️ Recording stopped. Processing with translation...'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // Use the new translation method
-        await _transcribeAudioWithTranslation();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Failed to stop recording'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('⏹️ Voice recording is not available'),
+        backgroundColor: Colors.orange,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   // New method for transcription with translation
@@ -269,30 +214,22 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
         ),
       );
       
-      final transcription = await _voiceService.transcribeAudio();
+      // Voice service not available - using placeholder
+      final transcription = 'Voice transcription not available';
       
-      if (transcription != null) {
-        setState(() {
-          _transcribedText = transcription;
-          // Automatically populate the food input field with transcribed text
-          _foodController.text = transcription;
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Transcription complete: $transcription'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Transcription failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      setState(() {
+        _transcribedText = transcription;
+        // Automatically populate the food input field with transcribed text
+        _foodController.text = transcription;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Transcription complete: $transcription'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 4),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -590,25 +527,26 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
     });
 
     try {
-      final apiService = ApiService();
-      final response = await apiService.analyzeFoodWithGPT4(
-        _foodController.text.trim(),
-        _pregnancyWeek,
-        _userId,
-      );
+      // TODO: Implement analyzeFoodWithGPT4 method in ApiService
+      final response = {
+        'success': false,
+        'message': 'analyzeFoodWithGPT4 method not implemented in ApiService'
+      };
 
       setState(() {
         _isAnalyzing = false;
       });
 
       if (response['success'] == true) {
-        final analysis = response['analysis'];
+        final analysis = response['analysis'] as Map<String, dynamic>?;
         
-        // Show comprehensive GPT-4 analysis
-        _showGPT4AnalysisDialog(analysis);
-        
-        // Store the analysis result
-        _nutritionAnalysis = analysis; // Update _nutritionAnalysis to show in UI
+        if (analysis != null) {
+          // Show comprehensive GPT-4 analysis
+          _showGPT4AnalysisDialog(analysis);
+          
+          // Store the analysis result
+          _nutritionAnalysis = analysis; // Update _nutritionAnalysis to show in UI
+        }
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -739,9 +677,9 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1133,9 +1071,9 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1315,7 +1253,7 @@ class _PatientFoodTrackingScreenState extends State<PatientFoodTrackingScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),

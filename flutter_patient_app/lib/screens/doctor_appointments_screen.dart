@@ -578,13 +578,13 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
 
   Future<void> _createAppointment(String patientId, String date, String time, String type, String notes) async {
     try {
-      final response = await _apiService.createAppointment(
-        patientId: patientId,
-        appointmentDate: date,
-        appointmentTime: time,
-        appointmentType: type,
-        notes: notes,
-      );
+      final response = await _apiService.createAppointment({
+        'patientId': patientId,
+        'appointmentDate': date,
+        'appointmentTime': time,
+        'appointmentType': type,
+        'notes': notes,
+      });
 
       if (response.containsKey('error')) {
         _showErrorSnackBar(response['error']);
@@ -599,14 +599,13 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
 
   Future<void> _updateAppointment(String appointmentId, String date, String time, String type, String status, String notes) async {
     try {
-      final response = await _apiService.updateAppointment(
-        appointmentId: appointmentId,
-        appointmentDate: date,
-        appointmentTime: time,
-        appointmentType: type,
-        appointmentStatus: status,
-        notes: notes,
-      );
+      final response = await _apiService.updateAppointment(appointmentId, {
+        'appointmentDate': date,
+        'appointmentTime': time,
+        'appointmentType': type,
+        'appointmentStatus': status,
+        'notes': notes,
+      });
 
       if (response.containsKey('error')) {
         _showErrorSnackBar(response['error']);

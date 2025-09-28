@@ -102,18 +102,6 @@ class _MedicationDosageListScreenState extends State<MedicationDosageListScreen>
     }
   }
 
-  Color _getUrgencyColor(String urgencyLevel) {
-    switch (urgencyLevel.toLowerCase()) {
-      case 'high':
-        return Colors.red;
-      case 'medium':
-        return Colors.orange;
-      case 'low':
-        return Colors.yellow;
-      default:
-        return Colors.green;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +125,7 @@ class _MedicationDosageListScreenState extends State<MedicationDosageListScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error, color: Colors.red, size: 64),
+                      const Icon(Icons.error, color: Colors.red, size: 64),
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage,
@@ -167,7 +155,7 @@ class _MedicationDosageListScreenState extends State<MedicationDosageListScreen>
                               padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
-                                  Icon(Icons.access_time, color: AppColors.primary),
+                                  const Icon(Icons.access_time, color: AppColors.primary),
                                   const SizedBox(width: 12),
                                   Text(
                                     'Current Time: ${_formatTime(_currentTime)}',
@@ -261,7 +249,7 @@ class _MedicationDosageListScreenState extends State<MedicationDosageListScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: color),
           ),
@@ -419,7 +407,7 @@ class _MedicationDosageListScreenState extends State<MedicationDosageListScreen>
           children: [
             Row(
               children: [
-                Icon(Icons.medication, color: Colors.green, size: 20),
+                const Icon(Icons.medication, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   medication['medication_name'] ?? 'Unknown Medication',

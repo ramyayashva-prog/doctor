@@ -307,7 +307,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+            colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -370,7 +370,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.white),
                     ),
@@ -388,8 +388,8 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: status == 'active' 
-                        ? Colors.green.withOpacity(0.2)
-                        : Colors.orange.withOpacity(0.2),
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.white),
                   ),
@@ -484,7 +484,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -801,7 +801,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: statusColor),
                 ),
@@ -944,13 +944,13 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
 
   Future<void> _createAppointment(String date, String time, String type, String notes) async {
     try {
-      final response = await _apiService.createAppointment(
-        patientId: widget.patientId,
-        appointmentDate: date,
-        appointmentTime: time,
-        appointmentType: type,
-        notes: notes,
-      );
+      final response = await _apiService.createAppointment({
+        'patient_id': widget.patientId,
+        'appointment_date': date,
+        'appointment_time': time,
+        'appointment_type': type,
+        'notes': notes,
+      });
 
       if (response.containsKey('error')) {
         _showErrorSnackBar(response['error']);
@@ -1011,7 +1011,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1073,7 +1073,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1188,7 +1188,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
+                  color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1241,7 +1241,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.1),
+                                  color: AppColors.success.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -1467,7 +1467,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1601,7 +1601,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -2362,7 +2362,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

@@ -4,9 +4,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../utils/constants.dart';
-import 'doctor_patient_list_screen.dart';
-import 'doctor_appointments_screen.dart';
+// Temporarily removing problematic imports
+// import 'doctor_patient_list_screen.dart';
+// import 'doctor_appointments_screen.dart';
 import 'add_patient_screen.dart';
+// import 'simple_doctor_profile_screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   const DoctorDashboardScreen({super.key});
@@ -92,19 +94,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
               print('🔍 Menu selected: $value');
               switch (value) {
                 case 'profile':
-                  print('🔍 Navigating to SimpleDoctorProfileScreen...');
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  print('🔍 Current AuthProvider state:');
-                  print('  isLoggedIn: ${authProvider.isLoggedIn}');
-                  print('  patientId: ${authProvider.patientId}');
-                  print('  email: ${authProvider.email}');
-                  print('  role: ${authProvider.role}');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SimpleDoctorProfileScreen(),
-                    ),
-                  );
+                  print('🔍 Profile selected');
+                  _navigateToProfile();
                   break;
                 case 'settings':
                   print('🔍 Settings selected');
@@ -208,7 +199,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     gradient: LinearGradient(
-                      colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                      colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -335,16 +326,6 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 Colors.green,
                 () => _startVideoCall(),
               ),
-              const SizedBox(height: 12),
-              
-              // Voice Dictation Button - REMOVED (voice functionality disabled)
-              // _buildActionButton(
-              //   'Voice Dictation',
-              //   'Start voice recording and transcription',
-              //   Icons.mic,
-              //   Colors.orange,
-              //   () => _startVoiceDictation(),
-              // ),
             ],
           ),
         );
@@ -366,7 +347,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -412,11 +393,57 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   Widget _buildPatientsTab() {
-    return const DoctorPatientListScreen();
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people, size: 64, color: AppColors.textSecondary),
+          SizedBox(height: 16),
+          Text(
+            'Patient List',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Coming Soon',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAppointmentsTab() {
-    return const DoctorAppointmentsScreen();
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.calendar_today, size: 64, color: AppColors.textSecondary),
+          SizedBox(height: 16),
+          Text(
+            'Appointments',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Coming Soon',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildReportsTab() {
@@ -447,53 +474,48 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   void _navigateToPatientList() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DoctorPatientListScreen(),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Patient list temporarily disabled'),
+        backgroundColor: Colors.orange,
       ),
     );
   }
 
   void _navigateToAppointments() {
-    // Navigate to today's appointments only
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DoctorAppointmentsScreen(showTodayOnly: true),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Appointments temporarily disabled'),
+        backgroundColor: Colors.orange,
       ),
     );
   }
 
   void _navigateToIncompletePatients() {
-    // Navigate to patient list and show a filter dialog or filtered view
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DoctorPatientListScreen(),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Pending reports temporarily disabled'),
+        backgroundColor: Colors.orange,
       ),
     );
-    // TODO: Add filter functionality to show only incomplete profiles
-    _showInfoDialog('Pending Reports', 'Shows patients with incomplete profiles that need attention.');
   }
 
   void _navigateToEmergencyAlerts() {
-    // Navigate to patient list with emergency filter
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DoctorPatientListScreen(),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Emergency alerts temporarily disabled'),
+        backgroundColor: Colors.orange,
       ),
     );
-    // TODO: Add filter functionality to show only emergency cases
-    _showInfoDialog('Emergency Alerts', 'Shows patients with high stress levels or urgent medical attention needed.');
   }
 
   void _addAppointment() {
-    // Switch to appointments tab
-    setState(() {
-      _selectedIndex = 2; // Appointments tab
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Add appointment temporarily disabled'),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
 
   Future<void> _addNewPatient() async {
@@ -546,10 +568,6 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     }
   }
 
-  // Voice dictation method removed - functionality disabled
-
-  // Voice dictation dialog removed - functionality disabled
-
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -568,26 +586,6 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         duration: const Duration(seconds: 3),
       ),
     );
-  }
-
-  void _showInfoDialog(String title, String message) {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    });
   }
 
   Widget _buildClickableStatCard(String title, String value, IconData icon, Color color, VoidCallback onTap) {
@@ -642,100 +640,18 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     );
   }
 
-  void _logout() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.logout();
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/role-selection');
-    }
-  }
-}
-
-                children: [
-                  Icon(icon, color: color, size: 24),
-                  const Spacer(),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
-            ],
-          ),
+  void _navigateToProfile() async {
+    try {
+      // Navigate to doctor profile screen
+      Navigator.pushNamed(context, '/doctor-profile');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error navigating to profile: $e'),
+          backgroundColor: AppColors.error,
         ),
-      ),
-    );
-  }
-
-  void _logout() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.logout();
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/role-selection');
+      );
     }
-  }
-}
-
-                children: [
-                  Icon(icon, color: color, size: 24),
-                  const Spacer(),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _logout() async {

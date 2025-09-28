@@ -155,7 +155,7 @@ class _PatientFullDetailsScreenState extends State<PatientFullDetailsScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+            colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -217,7 +217,7 @@ class _PatientFullDetailsScreenState extends State<PatientFullDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Row(
@@ -236,7 +236,7 @@ class _PatientFullDetailsScreenState extends State<PatientFullDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -280,7 +280,7 @@ class _PatientFullDetailsScreenState extends State<PatientFullDetailsScreen> {
             _buildSummaryCard('Food Entries', summary['total_food_entries'], Icons.restaurant, AppColors.success),
             _buildSummaryCard('Mental Health', summary['total_mental_health'], Icons.psychology, AppColors.info),
             _buildSummaryCard('Appointments', summary['total_appointments'], Icons.calendar_today, AppColors.secondary),
-            _buildSummaryCard('Prescriptions', summary['total_prescriptions'], Icons.description, AppColors.accent),
+            _buildSummaryCard('Prescriptions', summary['total_prescriptions'], Icons.description, Colors.purple),
           ],
         ),
       ],
@@ -411,7 +411,7 @@ class _PatientFullDetailsScreenState extends State<PatientFullDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

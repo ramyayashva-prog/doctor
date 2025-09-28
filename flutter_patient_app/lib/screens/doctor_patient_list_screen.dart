@@ -18,7 +18,6 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
   List<Map<String, dynamic>> _patients = [];
   bool _isLoading = true;
   String? _error;
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -27,16 +26,15 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
   }
 
   Future<void> _loadPatients() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
     try {
-      // Get doctor_id from auth provider
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final doctorId = authProvider.patientId; // doctor_id is stored in patientId field
-      
+
       if (doctorId == null || doctorId.isEmpty) {
         setState(() {
           _error = 'Doctor ID not found. Please login again.';
@@ -46,158 +44,62 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
       }
 
       final response = await _apiService.getDoctorPatients(doctorId);
-      
+
       if (response.containsKey('error')) {
         setState(() {
           _error = response['error'];
-          _isLoading = false;
         });
-        return;
+      } else {
+        setState(() {
+          _patients = List<Map<String, dynamic>>.from(response['patients'] ?? []);
+        });
       }
-
-      setState(() {
-        _patients = List<Map<String, dynamic>>.from(response['patients'] ?? []);
-        _isLoading = false;
-      });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load patients: $e';
+        _error = 'Error loading patients: $e';
+      });
+    } finally {
+      setState(() {
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _addNewPatient() async {
-    try {
-      // Navigate to Add Patient screen
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AddPatientScreen(),
-        ),
-      );
-      
-      // If patient was created successfully, refresh the patient list
-      if (result == true) {
-        _loadPatients();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('New patient added successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      print('❌ Error navigating to Add Patient screen: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error opening Add Patient screen: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
-  List<Map<String, dynamic>> get _filteredPatients {
-    if (_searchQuery.isEmpty) return _patients;
-    
-    return _patients.where((patient) {
-      final name = (patient['name'] ?? '').toLowerCase();
-      final email = (patient['email'] ?? '').toLowerCase();
-      final patientId = (patient['patient_id'] ?? '').toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      
-      return name.contains(query) || 
-             email.contains(query) || 
-             patientId.contains(query);
-    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Patient List'),
+        title: const Text('My Patients'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadPatients,
+            tooltip: 'Refresh',
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddPatientScreen(),
+                ),
+              ).then((_) => _loadPatients()); // Refresh list after adding patient
+            },
+            tooltip: 'Add Patient',
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search patients...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                ),
-                filled: true,
-                fillColor: AppColors.background,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-          ),
-          
-          // Patient Count
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: AppColors.background,
-            child: Row(
-              children: [
-                Text(
-                  '${_filteredPatients.length} patients found',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Patient List
-          Expanded(
-            child: _buildPatientList(),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _addNewPatient,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add),
-        label: const Text('New Patient'),
-      ),
+      body: _buildBody(),
     );
   }
 
-  Widget _buildPatientList() {
+  Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-        ),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -206,27 +108,25 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 64,
-              color: AppColors.error,
+              color: Colors.red,
             ),
             const SizedBox(height: 16),
             Text(
+              'Error loading patients',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
               _error!,
-              style: const TextStyle(
-                color: AppColors.error,
-                fontSize: 16,
-              ),
               textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadPatients,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
               child: const Text('Retry'),
             ),
           ],
@@ -234,23 +134,38 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
       );
     }
 
-    if (_filteredPatients.isEmpty) {
+    if (_patients.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.people_outline,
               size: 64,
-              color: AppColors.textSecondary,
+              color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isEmpty ? 'No patients found' : 'No patients match your search',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 16,
-              ),
+              'No patients found',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start by adding your first patient',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddPatientScreen(),
+                  ),
+                ).then((_) => _loadPatients());
+              },
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add Patient'),
             ),
           ],
         ),
@@ -259,12 +174,11 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadPatients,
-      color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _filteredPatients.length,
+        itemCount: _patients.length,
         itemBuilder: (context, index) {
-          final patient = _filteredPatients[index];
+          final patient = _patients[index];
           return _buildPatientCard(patient);
         },
       ),
@@ -272,270 +186,103 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
   }
 
   Widget _buildPatientCard(Map<String, dynamic> patient) {
-    final name = patient['name'] ?? 'Unknown Patient';
+    final patientId = patient['patient_id'] ?? patient['id'] ?? '';
+    final name = '${patient['first_name'] ?? ''} ${patient['last_name'] ?? ''}'.trim();
     final email = patient['email'] ?? '';
-    final patientId = patient['patient_id'] ?? '';
-    final isPregnant = patient['is_pregnant'] ?? false;
-    final isProfileComplete = patient['is_profile_complete'] ?? false;
-    final bloodType = patient['blood_type'] ?? '';
-    final mobile = patient['mobile'] ?? '';
-
+    final phone = patient['phone'] ?? '';
+    final age = patient['age'] ?? '';
+    final gender = patient['gender'] ?? '';
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () => _viewPatientDetails(patient),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 25,
+          backgroundColor: AppColors.primary,
+          child: Text(
+            name.isNotEmpty ? name[0].toUpperCase() : 'P',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        title: Text(
+          name.isNotEmpty ? name : 'Unknown Patient',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (email.isNotEmpty) ...[
+              const SizedBox(height: 4),
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    radius: 24,
+                  Icon(Icons.email, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Expanded(
                     child: Text(
-                      name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                      email,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'ID: $patientId',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      if (isPregnant)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.info.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.info),
-                          ),
-                          child: const Text(
-                            'Pregnant',
-                            style: TextStyle(
-                              color: AppColors.info,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      if (!isProfileComplete)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.warning.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.warning),
-                          ),
-                          child: const Text(
-                            'Incomplete',
-                            style: TextStyle(
-                              color: AppColors.warning,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+            ],
+            if (phone.isNotEmpty) ...[
+              const SizedBox(height: 2),
               Row(
                 children: [
+                  Icon(Icons.phone, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (email.isNotEmpty) ...[
-                          Row(
-                            children: [
-                              const Icon(Icons.email, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  email,
-                                  style: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                        if (mobile.isNotEmpty) ...[
-                          Row(
-                            children: [
-                              const Icon(Icons.phone, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                mobile,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                        ],
-                        if (bloodType.isNotEmpty)
-                          Row(
-                            children: [
-                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Blood Type: $bloodType',
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
+                    child: Text(
+                      phone,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.textSecondary,
                   ),
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _viewPatientDetails(Map<String, dynamic> patient) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DoctorPatientDetailScreen(
-          patientId: patient['patient_id'] ?? patient['object_id'] ?? '',
-          patientName: patient['name'] ?? 'Unknown Patient',
-        ),
-      ),
-    );
-  }
-}
-
-                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Blood Type: $bloodType',
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
+            if (age.isNotEmpty || gender.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      '${age.isNotEmpty ? 'Age: $age' : ''}${age.isNotEmpty && gender.isNotEmpty ? ' • ' : ''}${gender.isNotEmpty ? gender.toUpperCase() : ''}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.textSecondary,
                   ),
                 ],
               ),
             ],
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  void _viewPatientDetails(Map<String, dynamic> patient) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DoctorPatientDetailScreen(
-          patientId: patient['patient_id'] ?? patient['object_id'] ?? '',
-          patientName: patient['name'] ?? 'Unknown Patient',
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Colors.grey[400],
         ),
-      ),
-    );
-  }
-}
-
-                              const Icon(Icons.favorite, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Blood Type: $bloodType',
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DoctorPatientDetailScreen(
+                patientId: patientId,
+                patientName: name.isNotEmpty ? name : 'Unknown Patient',
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _viewPatientDetails(Map<String, dynamic> patient) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DoctorPatientDetailScreen(
-          patientId: patient['patient_id'] ?? patient['object_id'] ?? '',
-          patientName: patient['name'] ?? 'Unknown Patient',
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -95,7 +95,7 @@ class AuthProvider extends ChangeNotifier {
           _username = prefs.getString('username');
           
           // Set token in API service
-          ApiService.setAuthToken(_token!);
+          ApiService.setAuthToken(_token!, _patientId ?? '', _patientId ?? '');
         } else {
           // Token is invalid, clear everything
           await logout();
@@ -122,12 +122,17 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Use regular ApiService for patient login
-      final response = await _apiService.login(
-        loginIdentifier: loginIdentifier,
-        password: password,
-        role: role,
-      );
+      // Use appropriate login method based on role
+      final response = role == 'doctor' 
+        ? await _apiService.doctorLogin({
+            'email': loginIdentifier, // Doctor login uses email
+            'password': password,
+          })
+        : await _apiService.login({
+            'loginIdentifier': loginIdentifier,
+            'password': password,
+            'role': role,
+          });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -218,7 +223,7 @@ class AuthProvider extends ChangeNotifier {
         print('  jwt_token: ${_jwtToken?.substring(0, 20) ?? 'None'}...');
 
         // Set token in API service
-        ApiService.setAuthToken(_token!);
+        ApiService.setAuthToken(_token!, _patientId ?? '', _patientId ?? '');
 
         _isLoading = false;
         notifyListeners();
@@ -249,13 +254,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.signup(
-        username: username,
-        email: email,
-        mobile: mobile,
-        password: password,
-        role: role,
-      );
+      final response = await _apiService.signup({
+        'username': username,
+        'email': email,
+        'mobile': mobile,
+        'password': password,
+        'role': role,
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -318,12 +323,12 @@ class AuthProvider extends ChangeNotifier {
         print('✅ AuthProvider - JWT token is present for doctor verification');
       }
       
-      final response = await _apiService.verifyOtp(
-        email: email,
-        otp: otp,
-        role: role,
-        jwtToken: _jwtToken, // Pass JWT token for doctor verification
-      );
+      final response = await _apiService.verifyOtp({
+        'email': email,
+        'otp': otp,
+        'role': role,
+        'jwtToken': _jwtToken, // Pass JWT token for doctor verification
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -397,7 +402,7 @@ class AuthProvider extends ChangeNotifier {
         await prefs.setString('objectId', _objectId!);
 
         // Set token in API service
-        ApiService.setAuthToken(_token!);
+        ApiService.setAuthToken(_token!, _patientId ?? '', _patientId ?? '');
 
         _isLoading = false;
         notifyListeners();
@@ -425,10 +430,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.forgotPassword(
-        loginIdentifier: loginIdentifier,
-        role: role,
-      );
+      final response = await _apiService.forgotPassword({
+        'loginIdentifier': loginIdentifier,
+        'role': role,
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -459,12 +464,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.resetPassword(
-        email: email,
-        otp: otp,
-        newPassword: newPassword,
-        role: role,
-      );
+      final response = await _apiService.resetPassword({
+        'email': email,
+        'otp': otp,
+        'newPassword': newPassword,
+        'role': role,
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -521,10 +526,10 @@ class AuthProvider extends ChangeNotifier {
       print('  Email: $email');
       print('  Role: $role');
       
-      final response = await _apiService.resendOtp(
-        email: email,
-        role: role,
-      );
+      final response = await _apiService.resendOtp({
+        'email': email,
+        'role': role,
+      });
       
       print('🔍 AuthProvider - resendOtp Response:');
       print('  Response: $response');
@@ -556,10 +561,10 @@ class AuthProvider extends ChangeNotifier {
       print('  Email: $email');
       print('  Purpose: $purpose');
       
-      final response = await _apiService.doctorSendOtp(
-        email: email,
-        purpose: purpose,
-      );
+      final response = await _apiService.doctorSendOtp({
+        'email': email,
+        'purpose': purpose,
+      });
       
       print('🔍 AuthProvider - doctorSendOtp Response:');
       print('  Response: $response');
