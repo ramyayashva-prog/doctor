@@ -5,6 +5,12 @@ Doctor Controller - Handles doctor operations
 from flask import request, jsonify
 from typing import Dict, Any
 from datetime import datetime
+import sys
+import os
+
+# Add the parent directory to the path to import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.objectid_converter import convert_objectid_to_string
 
 class DoctorController:
     """Doctor controller"""
@@ -225,9 +231,8 @@ class DoctorController:
             if not patient:
                 return jsonify({'success': False, 'message': f'Patient not found with ID: {patient_id}'}), 404
             
-            # Convert ObjectId to string for JSON serialization
-            if '_id' in patient:
-                patient['_id'] = str(patient['_id'])
+            # Convert all ObjectIds to strings recursively
+            patient = convert_objectid_to_string(patient)
             
             # Get all health data from patient document
             full_details = {
@@ -277,11 +282,8 @@ class DoctorController:
                 }
             }
             
-            # Convert ObjectIds in health data arrays
-            for category in full_details['health_data']:
-                for item in full_details['health_data'][category]:
-                    if '_id' in item:
-                        item['_id'] = str(item['_id'])
+            # Convert all ObjectIds in the full_details recursively
+            full_details = convert_objectid_to_string(full_details)
             
             print(f"✅ Retrieved FULL patient details for: {patient_id}")
             print(f"📊 Summary: {full_details['summary']}")
@@ -397,12 +399,22 @@ DETAILED HEALTH INFORMATION:
             import os
             from openai import OpenAI
             
-            # Get OpenAI API key from environment
+            # Get OpenAI API key from environment variables
+            # This works for both local (.env file) and Render (environment variables)
             api_key = os.getenv('OPENAI_API_KEY')
             
             if not api_key:
-                print('❌ OpenAI API key not found in .env file')
+                print('❌ OpenAI API key not found in environment variables')
+                print('💡 For local development: Add OPENAI_API_KEY to .env file')
+                print('💡 For Render deployment: Set OPENAI_API_KEY in Render Dashboard > Environment')
                 return None
+            
+            if not api_key.startswith('sk-'):
+                print('❌ Invalid OpenAI API key format (should start with sk-)')
+                print(f'   Current key format: {api_key[:10]}...{api_key[-4:] if len(api_key) > 14 else api_key}')
+                return None
+            
+            print(f'✅ OpenAI API key found: {api_key[:10]}...{api_key[-4:]}')
             
             # Initialize OpenAI client
             client = OpenAI(api_key=api_key)
@@ -425,21 +437,43 @@ Patient Data:
 Please provide a clear, professional medical summary suitable for a doctor's review.
 """
             
-            # Call OpenAI API
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=1000,
-                temperature=0.3
-            )
+            # Call OpenAI API with error handling
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.3,
+                    timeout=30  # Add timeout to prevent hanging
+                )
+                
+                print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')
+                return response.choices[0].message.content
+                
+            except Exception as openai_error:
+                print(f'❌ OpenAI API call failed: {openai_error}')
+                print(f'   Error type: {type(openai_error).__name__}')
+                
+                # Handle specific OpenAI errors
+                if "insufficient_quota" in str(openai_error).lower():
+                    print('💡 OpenAI API quota exceeded - check your billing')
+                elif "invalid_api_key" in str(openai_error).lower():
+                    print('💡 Invalid API key - verify your OpenAI API key')
+                elif "rate_limit" in str(openai_error).lower():
+                    print('💡 Rate limit exceeded - try again later')
+                
+                return None
             
-            return response.choices[0].message.content
-            
+        except ImportError as import_error:
+            print(f'❌ OpenAI library not installed: {import_error}')
+            print('💡 Install with: pip install openai')
+            return None
         except Exception as e:
-            print(f'❌ Error with OpenAI API: {e}')
+            print(f'❌ Unexpected error with OpenAI API: {e}')
+            print(f'   Error type: {type(e).__name__}')
             return None
     
     def get_appointments(self, request) -> tuple:

@@ -77,6 +77,91 @@ def health_check():
         'version': '1.0.0'
     })
 
+# Debug endpoints for OpenAI configuration
+@app.route('/debug/openai-config', methods=['GET'])
+def debug_openai_config():
+    """Debug OpenAI API key configuration"""
+    try:
+        import os
+        
+        # Check environment variables
+        api_key = os.getenv('OPENAI_API_KEY')
+        
+        debug_info = {
+            'openai_api_key_present': bool(api_key),
+            'openai_api_key_format': f"{api_key[:10]}...{api_key[-4:]}" if api_key else None,
+            'openai_api_key_valid_format': api_key.startswith('sk-') if api_key else False,
+            'environment_vars': {k: v for k, v in os.environ.items() if 'OPENAI' in k or 'API' in k},
+            'python_path': os.getcwd(),
+            'environment': os.getenv('ENVIRONMENT', 'development')
+        }
+        
+        return jsonify({
+            'success': True,
+            'debug_info': debug_info,
+            'message': 'OpenAI configuration debug info'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Debug failed'
+        }), 500
+
+@app.route('/debug/test-openai', methods=['GET'])
+def test_openai_api():
+    """Test OpenAI API connection"""
+    try:
+        import os
+        from openai import OpenAI
+        
+        # Get API key
+        api_key = os.getenv('OPENAI_API_KEY')
+        
+        if not api_key:
+            return jsonify({
+                'success': False,
+                'error': 'OPENAI_API_KEY not found in environment variables',
+                'message': 'Please set OPENAI_API_KEY in your environment'
+            }), 400
+        
+        if not api_key.startswith('sk-'):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid API key format (should start with sk-)',
+                'message': 'Please check your OpenAI API key'
+            }), 400
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=api_key)
+        
+        # Test API connection with a simple request
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "Say 'Hello, OpenAI API is working!'"}
+            ],
+            max_tokens=50,
+            temperature=0.3
+        )
+        
+        return jsonify({
+            'success': True,
+            'openai_response': response.choices[0].message.content,
+            'model_used': response.model,
+            'tokens_used': response.usage.total_tokens,
+            'message': 'OpenAI API test successful'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'OpenAI API test failed'
+        }), 500
+
 # Authentication Routes
 @app.route('/doctor-signup', methods=['POST'])
 def doctor_signup():

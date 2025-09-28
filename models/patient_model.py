@@ -6,6 +6,12 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 from bson import ObjectId
 import logging
+import sys
+import os
+
+# Add the parent directory to the path to import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.objectid_converter import convert_objectid_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +85,8 @@ class PatientModel:
                     pass
             
             if patient:
-                patient['_id'] = str(patient['_id'])
-                return patient
+                # Convert all ObjectIds to strings recursively
+                return convert_objectid_to_string(patient)
             return None
             
         except Exception as e:
@@ -96,10 +102,8 @@ class PatientModel:
             
             patients = list(self.collection.find().skip(skip).limit(limit).sort("created_at", -1))
             
-            for patient in patients:
-                patient['_id'] = str(patient['_id'])
-            
-            return patients
+            # Convert all ObjectIds to strings recursively for each patient
+            return [convert_objectid_to_string(patient) for patient in patients]
                 
         except Exception as e:
             logger.error(f"Error getting all patients: {str(e)}")
@@ -195,10 +199,8 @@ class PatientModel:
             
             patients = list(self.collection.find(query).sort("created_at", -1))
             
-            for patient in patients:
-                patient['_id'] = str(patient['_id'])
-            
-            return patients
+            # Convert all ObjectIds to strings recursively for each patient
+            return [convert_objectid_to_string(patient) for patient in patients]
             
         except Exception as e:
             logger.error(f"Error searching patients: {str(e)}")
@@ -213,10 +215,8 @@ class PatientModel:
             
             patients = list(self.collection.find({"assigned_doctor_id": doctor_id}).sort("created_at", -1))
             
-            for patient in patients:
-                patient['_id'] = str(patient['_id'])
-            
-            return patients
+            # Convert all ObjectIds to strings recursively for each patient
+            return [convert_objectid_to_string(patient) for patient in patients]
             
         except Exception as e:
             logger.error(f"Error getting patients by doctor {doctor_id}: {str(e)}")
