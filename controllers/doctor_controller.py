@@ -322,13 +322,22 @@ class DoctorController:
                     'patient_id': patient_id,
                     'ai_summary': ai_summary,
                     'patient_name': patient_data.get('patient_info', {}).get('full_name', 'Unknown'),
-                    'summary_stats': patient_data.get('summary', {})
+                    'summary_stats': patient_data.get('summary', {}),
+                    'summary_type': 'AI-generated'
                 }), 200
             else:
+                # Use fallback summary if OpenAI fails
+                print('⚠️ OpenAI failed, using fallback summary')
+                fallback_summary = self._get_fallback_summary(patient_data)
                 return jsonify({
-                    'success': False,
-                    'message': 'Failed to generate AI summary'
-                }), 500
+                    'success': True,
+                    'patient_id': patient_id,
+                    'ai_summary': fallback_summary,
+                    'patient_name': patient_data.get('patient_info', {}).get('full_name', 'Unknown'),
+                    'summary_stats': patient_data.get('summary', {}),
+                    'summary_type': 'fallback-generated',
+                    'note': 'OpenAI API temporarily unavailable, using fallback summary'
+                }), 200
                 
         except Exception as e:
             print(f"Error getting AI summary: {e}")
@@ -415,29 +424,11 @@ DETAILED HEALTH INFORMATION:
             
             print(f'✅ OpenAI API key found: {api_key[:10]}...{api_key[-4:]}')
             
-            # Initialize OpenAI client with version compatibility
+            # Simple OpenAI client initialization for version 1.3.0
             try:
-                # Try different initialization methods based on OpenAI library version
-                try:
-                    # Method 1: Minimal initialization (newer versions)
-                    client = OpenAI(api_key=api_key)
-                    print('✅ OpenAI client initialized with minimal config')
-                except Exception as e1:
-                    print(f'⚠️ Method 1 failed: {e1}')
-                    try:
-                        # Method 2: With explicit parameters (older versions)
-                        client = OpenAI(
-                            api_key=api_key,
-                            timeout=30.0
-                        )
-                        print('✅ OpenAI client initialized with explicit config')
-                    except Exception as e2:
-                        print(f'⚠️ Method 2 failed: {e2}')
-                        # Method 3: Legacy initialization
-                        import openai
-                        openai.api_key = api_key
-                        client = openai
-                        print('✅ OpenAI client initialized with legacy method')
+                import openai
+                openai.api_key = api_key
+                print('✅ OpenAI client initialized with simple method')
             except Exception as client_error:
                 print(f'❌ Failed to initialize OpenAI client: {client_error}')
                 print(f'   Error type: {type(client_error).__name__}')
@@ -461,34 +452,19 @@ Patient Data:
 Please provide a clear, professional medical summary suitable for a doctor's review.
 """
             
-            # Call OpenAI API with version compatibility
+            # Call OpenAI API with simple method
             try:
                 print('📡 Making OpenAI API request...')
-                # Try modern API call first
-                try:
-                    response = client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        max_tokens=1000,
-                        temperature=0.3
-                    )
-                    print('✅ Modern API call successful')
-                except Exception as modern_error:
-                    print(f'⚠️ Modern API failed: {modern_error}')
-                    # Try legacy API call
-                    response = client.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        max_tokens=1000,
-                        temperature=0.3
-                    )
-                    print('✅ Legacy API call successful')
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.3
+                )
+                print('✅ OpenAI API call successful')
                 
                 print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')
                 print(f'✅ Model used: {response.model}')
@@ -525,6 +501,69 @@ Please provide a clear, professional medical summary suitable for a doctor's rev
             print(f'   Error type: {type(e).__name__}')
             print(f'   Error details: {str(e)}')
             return None
+    
+    def _get_fallback_summary(self, patient_data):
+        """Generate a simple summary without AI"""
+        try:
+            patient_info = patient_data.get('patient_info', {})
+            summary_stats = patient_data.get('summary', {})
+            
+            # Extract key information
+            name = patient_info.get('full_name', 'Unknown Patient')
+            age = patient_info.get('age', 'N/A')
+            gender = patient_info.get('gender', 'N/A')
+            blood_type = patient_info.get('blood_type', 'N/A')
+            is_pregnant = patient_info.get('is_pregnant', False)
+            
+            # Count health data
+            total_medications = summary_stats.get('total_medications', 0)
+            total_symptoms = summary_stats.get('total_symptoms', 0)
+            total_food_entries = summary_stats.get('total_food_entries', 0)
+            total_mental_health = summary_stats.get('total_mental_health', 0)
+            total_appointments = summary_stats.get('total_appointments', 0)
+            
+            # Generate summary
+            summary = f"""PATIENT HEALTH SUMMARY (Fallback Mode)
+=====================================
+
+PATIENT OVERVIEW:
+- Name: {name}
+- Age: {age}
+- Gender: {gender}
+- Blood Type: {blood_type}
+- Pregnancy Status: {'Pregnant' if is_pregnant else 'Not Pregnant'}
+
+HEALTH DATA SUMMARY:
+- Total Medications: {total_medications}
+- Symptom Reports: {total_symptoms}
+- Food/Nutrition Entries: {total_food_entries}
+- Mental Health Logs: {total_mental_health}
+- Appointments: {total_appointments}
+
+HEALTH ASSESSMENT:
+Based on the available data, this patient has {'active' if (total_medications + total_symptoms + total_food_entries + total_mental_health) > 0 else 'limited'} health monitoring activity.
+
+RECOMMENDATIONS:
+1. Continue regular health monitoring through the platform
+2. {'Maintain medication compliance' if total_medications > 0 else 'Consider medication management if needed'}
+3. {'Monitor symptom patterns' if total_symptoms > 0 else 'Track symptoms for early detection'}
+4. {'Continue nutrition tracking' if total_food_entries > 0 else 'Consider adding nutrition logging'}
+5. {'Maintain mental health awareness' if total_mental_health > 0 else 'Consider mental health monitoring'}
+
+PRIORITY AREAS:
+- Regular medical check-ups
+- Medication adherence {'(active monitoring needed)' if total_medications > 0 else '(no current medications)'}
+- Symptom tracking {'(ongoing)' if total_symptoms > 0 else '(no recent symptoms)'}
+- Overall health maintenance
+
+NOTE: This is a fallback summary generated without AI assistance. 
+For more detailed analysis, the OpenAI integration needs to be restored."""
+            
+            return summary.strip()
+            
+        except Exception as e:
+            print(f'❌ Error generating fallback summary: {e}')
+            return "Error generating summary. Please try again later."
     
     def get_appointments(self, request) -> tuple:
         """Get appointments for doctor"""
