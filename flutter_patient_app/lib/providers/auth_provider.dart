@@ -276,10 +276,43 @@ class AuthProvider extends ChangeNotifier {
       print('  Success: ${response['success']}');
       
       if (role == 'doctor') {
-        // For doctor role, signup only collects data
-        // JWT token will be received from doctor-send-otp call
+        // For doctor role, automatically send OTP after signup
         print('✅ AuthProvider - Doctor signup data collected successfully');
-        print('📝 Next step: Call doctorSendOtp() to get JWT token');
+        print('📝 Automatically calling doctor-send-otp to send OTP...');
+        
+        // Automatically send OTP after signup
+        final otpResponse = await _apiService.doctorSendOtp({
+          'email': email,
+          'purpose': 'signup'
+        });
+        
+        // Check if OTP and JWT token are available (success even if email fails)
+        if (otpResponse.containsKey('otp') && otpResponse.containsKey('jwt_token')) {
+          // Store JWT token for OTP verification
+          _jwtToken = otpResponse['jwt_token'];
+          await _storeJwtToken(_jwtToken!);
+          print('✅ AuthProvider - JWT token received and stored');
+          
+          // Get OTP for user reference
+          final otp = otpResponse['otp'];
+          print('✅ AuthProvider - OTP generated: $otp');
+          
+          if (otpResponse.containsKey('error')) {
+            // Email failed but OTP is available - show warning but continue
+            print('⚠️ AuthProvider - Email sending failed, but OTP is available: $otp');
+            print('📧 Email may not have been sent, but you can use OTP: $otp');
+          } else {
+            print('✅ AuthProvider - OTP sent successfully to: $email');
+            print('📧 Check your email for the OTP code');
+          }
+        } else {
+          // No OTP or JWT token - this is a real failure
+          print('❌ AuthProvider - Failed to generate OTP: ${otpResponse['error'] ?? 'Unknown error'}');
+          _error = 'Failed to generate OTP: ${otpResponse['error'] ?? 'Unknown error'}';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
       }
 
       _isLoading = false;
@@ -323,11 +356,33 @@ class AuthProvider extends ChangeNotifier {
         print('✅ AuthProvider - JWT token is present for doctor verification');
       }
       
+      // Load JWT token from storage if not already loaded
+      if (_jwtToken == null) {
+        await _loadJwtToken();
+      }
+      
+      // Debug logging for OTP verification
+      print('🔍 AuthProvider - OTP Verification Debug:');
+      print('  Email: $email');
+      print('  OTP: $otp');
+      print('  Role: $role');
+      print('  JWT Token: ${_jwtToken?.substring(0, 50) ?? 'NULL'}...');
+      print('  JWT Token Length: ${_jwtToken?.length ?? 0}');
+      
+      // Check if JWT token is available
+      if (_jwtToken == null || _jwtToken!.isEmpty) {
+        print('❌ AuthProvider - JWT token is null or empty');
+        _error = 'JWT token not found. Please request OTP again.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      
       final response = await _apiService.verifyOtp({
         'email': email,
         'otp': otp,
         'role': role,
-        'jwtToken': _jwtToken, // Pass JWT token for doctor verification
+        'jwt_token': _jwtToken, // Pass JWT token for doctor verification
       });
 
       if (response.containsKey('error')) {
@@ -583,6 +638,47 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print('❌ AuthProvider - doctorSendOtp Error: $e');
       return {'error': 'Network error: $e'};
+    }
+  }
+
+  // Store JWT token
+  Future<void> _storeJwtToken(String token) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('jwt_token', token);
+      _jwtToken = token;
+      print('✅ AuthProvider - JWT token stored');
+    } catch (e) {
+      print('❌ AuthProvider - Store JWT token error: $e');
+    }
+  }
+
+  // Load JWT token from SharedPreferences
+  Future<void> _loadJwtToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      if (token != null) {
+        _jwtToken = token;
+        print('✅ AuthProvider - JWT token loaded from storage');
+        print('  JWT token length: ${_jwtToken?.length}');
+      } else {
+        print('⚠️ AuthProvider - No JWT token found in storage');
+      }
+    } catch (e) {
+      print('❌ AuthProvider - Load JWT token error: $e');
+    }
+  }
+
+  // Clear JWT token
+  Future<void> _clearJwtToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('jwt_token');
+      _jwtToken = null;
+      print('✅ AuthProvider - JWT token cleared');
+    } catch (e) {
+      print('❌ AuthProvider - Clear JWT token error: $e');
     }
   }
 } 

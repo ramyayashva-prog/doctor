@@ -148,11 +148,8 @@ class JWTService:
                 'type': 'access_token'
             }
             
-            # Convert RSA key to PEM format
-            private_key_pem = self.private_key.save_pkcs1().decode('utf-8')
-            
-            # Generate JWT token
-            access_token = jwt.encode(payload, private_key_pem, algorithm=self.algorithm)
+            # Generate JWT token using HMAC
+            access_token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
             
             print(f"🔑 Access token created for {email}")
             return access_token
@@ -174,11 +171,8 @@ class JWTService:
                 'type': 'refresh_token'
             }
             
-            # Convert RSA key to PEM format
-            private_key_pem = self.private_key.save_pkcs1().decode('utf-8')
-            
-            # Generate JWT token
-            refresh_token = jwt.encode(payload, private_key_pem, algorithm=self.algorithm)
+            # Generate JWT token using HMAC
+            refresh_token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
             
             print(f"🔄 Refresh token created for {user_id}")
             return refresh_token

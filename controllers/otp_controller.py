@@ -58,13 +58,25 @@ class OTPController:
                         'message': 'OTP sent successfully for signup verification',
                         'email': email,
                         'jwt_token': jwt_token,
-                        'otp': otp
+                        'otp': otp,
+                        'token_info': {
+                            'token_length': len(jwt_token),
+                            'token_preview': jwt_token[:50] + '...',
+                            'expires_in': '10 minutes',
+                            'purpose': 'doctor_signup_verification'
+                        }
                     }), 200
                 else:
                     return jsonify({
                         'error': 'Failed to send OTP email. Please check your email configuration.',
                         'jwt_token': jwt_token,
-                        'otp': otp
+                        'otp': otp,
+                        'token_info': {
+                            'token_length': len(jwt_token),
+                            'token_preview': jwt_token[:50] + '...',
+                            'expires_in': '10 minutes',
+                            'purpose': 'doctor_signup_verification'
+                        }
                     }), 500
                     
             elif purpose == 'password_reset':

@@ -24,7 +24,7 @@ class ApiConfig {
   static const String nutritionBaseUrl = 'http://localhost:5000';  // Local backend
   
   // Alternative URLs for different platforms
-  static const String baseUrlAlt = 'http://localhost:5000';
+  static const String baseUrlAlt = 'https://doctor-9don.onrender.com';
   static const String baseUrlLocal = 'http://localhost:5000';
   
   // Platform-specific URLs (for local development)
@@ -33,17 +33,16 @@ class ApiConfig {
   
   // Get the best URL for the current platform
   static String getBestBaseUrl() {
-    // For now, return the main URL
-    // You can add platform detection logic here if needed
+    // Return production URL for now
     return baseUrl;
   }
   
   // Get alternative URLs for testing
   static List<String> getAlternativeUrls() {
     return [
-      baseUrl,
+      baseUrl,  // Production URL first
       baseUrlAlt,
-      'http://localhost:5000',
+      'http://localhost:5000',  // Local development fallback
       androidEmulatorUrl,  // Only for local development
       iosSimulatorUrl,     // Only for local development
     ];

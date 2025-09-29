@@ -43,10 +43,8 @@ class EmailService:
             if is_html:
                 msg.attach(MIMEText(body, 'html'))
             else:
-                # Encode body as base64
-                body_bytes = body.encode('utf-8')
-                body_b64 = base64.b64encode(body_bytes).decode('utf-8')
-                msg.attach(MIMEText(body_b64, 'plain', 'utf-8'))
+                # Send plain text without base64 encoding
+                msg.attach(MIMEText(body, 'plain', 'utf-8'))
             
             # Connect to server and send email
             print(f"📧 Attempting to send email to: {to_email}")

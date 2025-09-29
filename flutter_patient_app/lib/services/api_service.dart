@@ -342,7 +342,7 @@ class ApiService {
       print('👥 Getting patients for doctor: $doctorId');
       
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/doctor/$doctorId/patients'),
+        Uri.parse('${ApiConfig.baseUrl}/doctor/patients'),
         headers: _getAuthHeaders(),
       );
 
@@ -387,13 +387,21 @@ class ApiService {
 
   Future<Map<String, dynamic>> signup(Map<String, dynamic> signupData) async {
     try {
+      // Use different endpoints based on role
+      String endpoint = '/signup';
+      if (signupData['role'] == 'doctor') {
+        endpoint = '/doctor-signup';
+      } else {
+        endpoint = '/patient/signup';
+      }
+      
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/signup'),
+        Uri.parse('${ApiConfig.baseUrl}$endpoint'),
         headers: _headers,
         body: json.encode(signupData),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
         return {'error': 'Signup failed'};
@@ -405,12 +413,30 @@ class ApiService {
 
   Future<Map<String, dynamic>> verifyOtp(Map<String, dynamic> otpData) async {
     try {
+      // Use different endpoints based on role
+      String endpoint = '/verify-otp';
+      if (otpData['role'] == 'doctor') {
+        endpoint = '/doctor-verify-otp';
+      } else {
+        endpoint = '/patient/verify-otp';
+      }
+      
+      // Debug logging for API service
+      print('🔍 API Service - OTP Verification Debug:');
+      print('  Endpoint: $endpoint');
+      print('  Data being sent: $otpData');
+      print('  JSON body: ${json.encode(otpData)}');
+      
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/verify-otp'),
+        Uri.parse('${ApiConfig.baseUrl}$endpoint'),
         headers: _headers,
         body: json.encode(otpData),
       );
 
+      print('🔍 API Service - Response Debug:');
+      print('  Status Code: ${response.statusCode}');
+      print('  Response Body: ${response.body}');
+      
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
@@ -483,10 +509,19 @@ class ApiService {
         body: json.encode(data),
       );
 
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
+      final responseData = json.decode(response.body);
+      
+      // Check if OTP and JWT token are available (success even if email fails)
+      if (responseData.containsKey('otp') && responseData.containsKey('jwt_token')) {
+        // OTP and JWT token are available - this is success regardless of status code
+        print('✅ API Service - OTP and JWT token received (status: ${response.statusCode})');
+        return responseData;
+      } else if (response.statusCode == 200) {
+        // Traditional success case
+        return responseData;
       } else {
-        return {'error': 'Doctor OTP send failed'};
+        // Real failure - no OTP or JWT token
+        return {'error': 'Doctor OTP send failed: ${responseData['error'] ?? 'Unknown error'}'};
       }
     } catch (e) {
       return {'error': 'Network error: $e'};
