@@ -4,11 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../utils/constants.dart';
-// Temporarily removing problematic imports
-// import 'doctor_patient_list_screen.dart';
-// import 'doctor_appointments_screen.dart';
+import 'doctor_patient_list_screen.dart';
+import 'doctor_appointments_screen.dart';
+import 'doctor_reports_screen.dart';
 import 'add_patient_screen.dart';
-// import 'simple_doctor_profile_screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   const DoctorDashboardScreen({super.key});
@@ -393,129 +392,50 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   Widget _buildPatientsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people, size: 64, color: AppColors.textSecondary),
-          SizedBox(height: 16),
-          Text(
-            'Patient List',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const DoctorPatientListScreen();
   }
 
   Widget _buildAppointmentsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.calendar_today, size: 64, color: AppColors.textSecondary),
-          SizedBox(height: 16),
-          Text(
-            'Appointments',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const DoctorAppointmentsScreen();
   }
 
   Widget _buildReportsTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.analytics, size: 64, color: AppColors.textSecondary),
-          SizedBox(height: 16),
-          Text(
-            'Reports & Analytics',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const DoctorReportsScreen();
   }
 
   void _navigateToPatientList() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Patient list temporarily disabled'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    // Switch to Patients tab
+    setState(() {
+      _selectedIndex = 1; // Patients tab index
+    });
   }
 
   void _navigateToAppointments() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Appointments temporarily disabled'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    // Switch to Appointments tab
+    setState(() {
+      _selectedIndex = 2; // Appointments tab index
+    });
   }
 
   void _navigateToIncompletePatients() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pending reports temporarily disabled'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    // Switch to Reports tab
+    setState(() {
+      _selectedIndex = 3; // Reports tab index
+    });
   }
 
   void _navigateToEmergencyAlerts() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Emergency alerts temporarily disabled'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    // Switch to Reports tab for emergency alerts
+    setState(() {
+      _selectedIndex = 3; // Reports tab index
+    });
   }
 
   void _addAppointment() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Add appointment temporarily disabled'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    // Switch to Appointments tab
+    setState(() {
+      _selectedIndex = 2; // Appointments tab index
+    });
   }
 
   Future<void> _addNewPatient() async {

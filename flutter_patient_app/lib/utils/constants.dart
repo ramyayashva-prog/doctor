@@ -18,10 +18,10 @@ class AppColors {
 
 class ApiConfig {
   // Backend server URLs - configured for local development
-  static const String baseUrl = 'http://localhost:5000';  // Local development server
-  static const String doctorBaseUrl = 'http://localhost:5000';
+  static const String baseUrl = 'http://65.2.81.206:5000';  // Local development server
+  static const String doctorBaseUrl = 'http://65.2.81.206:5000';
   // IMPORTANT: Nutrition backend is now integrated into main backend
-  static const String nutritionBaseUrl = 'http://localhost:5000';  // Local backend
+  static const String nutritionBaseUrl = 'http://65.2.81.206:5000';  // Local backend
   
   // Alternative URLs for different platforms
   static const String baseUrlAlt = 'https://doctor-9don.onrender.com';

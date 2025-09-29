@@ -465,11 +465,11 @@ Please provide a clear, professional medical summary suitable for a doctor's rev
                     temperature=0.3
                 )
                 print('✅ OpenAI API call successful')
-                
+            
                 print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')
                 print(f'✅ Model used: {response.model}')
                 return response.choices[0].message.content
-                
+            
             except Exception as openai_error:
                 print(f'❌ OpenAI API call failed: {openai_error}')
                 print(f'   Error type: {type(openai_error).__name__}')

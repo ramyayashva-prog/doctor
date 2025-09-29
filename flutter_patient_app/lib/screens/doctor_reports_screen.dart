@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
-class DoctorAppointmentsScreen extends StatefulWidget {
-  const DoctorAppointmentsScreen({super.key});
+class DoctorReportsScreen extends StatefulWidget {
+  const DoctorReportsScreen({super.key});
 
   @override
-  State<DoctorAppointmentsScreen> createState() => _DoctorAppointmentsScreenState();
+  State<DoctorReportsScreen> createState() => _DoctorReportsScreenState();
 }
 
-class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
+class _DoctorReportsScreenState extends State<DoctorReportsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Appointments'),
+        title: const Text('Reports & Analytics'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _addAppointment,
-          ),
-        ],
       ),
       body: _buildBody(),
     );
@@ -34,13 +28,13 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.calendar_today,
+            Icons.analytics,
             size: 64,
             color: AppColors.textSecondary,
           ),
           SizedBox(height: 16),
           Text(
-            'Appointments',
+            'Reports & Analytics',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -49,7 +43,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'No appointments scheduled',
+            'No reports available',
             style: TextStyle(
               color: AppColors.textSecondary,
             ),
@@ -63,15 +57,6 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _addAppointment() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Add appointment feature coming soon!'),
-        backgroundColor: Colors.orange,
       ),
     );
   }
