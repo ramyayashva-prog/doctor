@@ -248,6 +248,37 @@ def complete_doctor_profile():
     """Complete doctor profile"""
     return doctor_controller.complete_profile(request)
 
+# Kebab-case endpoints for Flutter app compatibility
+@app.route('/doctor-reset-password', methods=['POST'])
+def doctor_reset_password():
+    """Reset doctor password - kebab-case endpoint"""
+    return auth_controller.doctor_reset_password(request)
+
+@app.route('/doctor-forgot-password', methods=['POST'])
+def doctor_forgot_password():
+    """Forgot doctor password - kebab-case endpoint"""
+    return auth_controller.doctor_forgot_password(request)
+
+@app.route('/doctor-complete-profile', methods=['POST'])
+def doctor_complete_profile_kebab():
+    """Complete doctor profile - kebab-case endpoint"""
+    return doctor_controller.complete_profile(request)
+
+@app.route('/doctor-profile-fields', methods=['GET'])
+def doctor_profile_fields():
+    """Get doctor profile fields - kebab-case endpoint"""
+    return doctor_controller.get_profile_fields(request)
+
+@app.route('/complete-profile', methods=['POST'])
+def complete_profile():
+    """Complete profile - generic endpoint for Flutter compatibility"""
+    return doctor_controller.complete_profile(request)
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Reset password - generic endpoint for Flutter compatibility"""
+    return auth_controller.doctor_reset_password(request)
+
 @app.route('/doctor/patients', methods=['GET'])
 def get_doctor_patients():
     """Get patients list for doctor"""

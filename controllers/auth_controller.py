@@ -297,3 +297,74 @@ class AuthController:
                 
         except Exception as e:
             return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
+    def doctor_reset_password(self, request) -> tuple:
+        """Reset doctor password"""
+        try:
+            data = request.get_json()
+            email = data.get('email', '').strip()
+            new_password = data.get('new_password', '').strip()
+            otp = data.get('otp', '').strip()
+            
+            jwt_token = data.get('jwt_token', '').strip()
+            
+            if not all([email, new_password, otp, jwt_token]):
+                return jsonify({'error': 'Email, new password, OTP, and JWT token are required'}), 400
+            
+            # Verify JWT OTP first
+            verification_result = self.jwt_service.verify_otp_jwt(jwt_token, email, otp)
+            if not verification_result['success']:
+                return jsonify({'error': verification_result['error']}), 400
+            
+            # Reset password
+            result = self.doctor_model.reset_password(email, new_password)
+            if result['success']:
+                return jsonify({
+                    'success': True,
+                    'message': 'Password reset successfully'
+                }), 200
+            else:
+                return jsonify({'error': result['error']}), 400
+                
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
+    def doctor_forgot_password(self, request) -> tuple:
+        """Forgot doctor password - send reset OTP"""
+        try:
+            data = request.get_json()
+            email = data.get('email', '').strip()
+            
+            if not email:
+                return jsonify({'error': 'Email is required'}), 400
+            
+            # Check if doctor exists
+            doctor = self.doctor_model.get_doctor_by_email(email)
+            if not doctor:
+                return jsonify({'error': 'Doctor not found'}), 404
+            
+            # Generate JWT-based OTP for password reset
+            try:
+                otp, jwt_token = self.jwt_service.generate_otp_jwt(email, 'doctor_password_reset', {'email': email})
+                print(f"🔐 Generated JWT OTP for password reset: {otp} for email: {email}")
+            except Exception as e:
+                return jsonify({
+                    'error': f'Failed to generate OTP: {str(e)}'
+                }), 500
+            
+            # Send OTP email
+            email_result = self.email_service.send_otp_email(email, otp)
+            
+            if email_result['success']:
+                return jsonify({
+                    'success': True,
+                    'message': 'OTP sent to your email for password reset',
+                    'email': email,
+                    'jwt_token': jwt_token,
+                    'otp': otp
+                }), 200
+            else:
+                return jsonify({'error': 'Failed to send OTP email'}), 500
+                
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500

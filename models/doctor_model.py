@@ -403,3 +403,45 @@ class DoctorModel:
             import traceback
             traceback.print_exc()
             return False
+    
+    def reset_password(self, email: str, new_password: str) -> Dict[str, Any]:
+        """Reset doctor password"""
+        try:
+            # Update collection reference
+            self._update_collection()
+            
+            if self.collection is None:
+                return {
+                    'success': False,
+                    'error': 'Database not connected'
+                }
+            
+            # Hash the new password
+            from werkzeug.security import generate_password_hash
+            hashed_password = generate_password_hash(new_password)
+            
+            # Update password
+            result = self.collection.update_one(
+                {'email': email},
+                {'$set': {
+                    'password_hash': hashed_password,
+                    'updated_at': datetime.utcnow()
+                }}
+            )
+            
+            if result.modified_count > 0:
+                return {
+                    'success': True,
+                    'message': 'Password reset successfully'
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Doctor not found or no changes made'
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Database error: {str(e)}'
+            }

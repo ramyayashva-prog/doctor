@@ -1070,3 +1070,43 @@ For more detailed analysis, the OpenAI integration needs to be restored."""
         except Exception as e:
             print(f"Error getting vital signs history: {e}")
             return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+    
+    def get_profile_fields(self, request) -> tuple:
+        """Get doctor profile fields - returns available fields for profile completion"""
+        try:
+            # Return the list of fields that can be updated in doctor profile
+            profile_fields = {
+                'personal_info': {
+                    'first_name': {'type': 'string', 'required': True, 'description': 'Doctor first name'},
+                    'last_name': {'type': 'string', 'required': True, 'description': 'Doctor last name'},
+                    'email': {'type': 'email', 'required': True, 'description': 'Doctor email address'},
+                    'mobile': {'type': 'string', 'required': True, 'description': 'Doctor mobile number'}
+                },
+                'professional_info': {
+                    'specialization': {'type': 'string', 'required': True, 'description': 'Medical specialization'},
+                    'license_number': {'type': 'string', 'required': True, 'description': 'Medical license number'},
+                    'experience_years': {'type': 'number', 'required': True, 'description': 'Years of experience'},
+                    'qualifications': {'type': 'array', 'required': False, 'description': 'List of qualifications'}
+                },
+                'practice_info': {
+                    'hospital_name': {'type': 'string', 'required': False, 'description': 'Hospital or clinic name'},
+                    'consultation_fee': {'type': 'number', 'required': False, 'description': 'Consultation fee'},
+                    'available_timings': {'type': 'object', 'required': False, 'description': 'Available consultation timings'},
+                    'languages': {'type': 'array', 'required': False, 'description': 'Languages spoken'}
+                },
+                'address_info': {
+                    'address': {'type': 'string', 'required': False, 'description': 'Practice address'},
+                    'city': {'type': 'string', 'required': False, 'description': 'City'},
+                    'state': {'type': 'string', 'required': False, 'description': 'State'},
+                    'pincode': {'type': 'string', 'required': False, 'description': 'Pincode'}
+                }
+            }
+            
+            return jsonify({
+                'success': True,
+                'profile_fields': profile_fields,
+                'message': 'Available doctor profile fields'
+            }), 200
+            
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
