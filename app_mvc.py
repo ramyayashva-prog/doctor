@@ -255,6 +255,22 @@ def complete_doctor_profile():
     """Complete doctor profile"""
     return doctor_controller.complete_profile(request)
 
+# Public doctor endpoints for patient selection
+@app.route('/doctors', methods=['GET'])
+def get_all_doctors():
+    """Get all doctors list for patient selection"""
+    return doctor_controller.get_all_doctors(request)
+
+@app.route('/doctors/search', methods=['GET'])
+def search_doctors():
+    """Search doctors with filters for patient selection"""
+    return doctor_controller.get_all_doctors(request)
+
+@app.route('/doctors/<doctor_id>', methods=['GET'])
+def get_public_doctor_profile(doctor_id):
+    """Get public doctor profile for patient selection"""
+    return doctor_controller.get_public_doctor_profile(doctor_id)
+
 # Kebab-case endpoints for Flutter app compatibility
 @app.route('/doctor-reset-password', methods=['POST'])
 def doctor_reset_password():

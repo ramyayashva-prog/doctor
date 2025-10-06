@@ -129,10 +129,10 @@ class AuthProvider extends ChangeNotifier {
             'password': password,
           })
         : await _apiService.login({
-            'loginIdentifier': loginIdentifier,
-            'password': password,
-            'role': role,
-          });
+        'loginIdentifier': loginIdentifier,
+        'password': password,
+        'role': role,
+      });
 
       if (response.containsKey('error')) {
         _error = response['error'];
@@ -269,50 +269,34 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
 
-      // NEW FLOW: Signup only collects data, JWT comes from doctor-send-otp
+      // NEW FLOW: Backend automatically sends OTP during signup
       print('🔍 AuthProvider - Signup Response:');
       print('  Role: $role');
       print('  Response keys: ${response.keys.toList()}');
-      print('  Success: ${response['success']}');
+      print('  Status: ${response['status']}');
       
-      if (role == 'doctor') {
-        // For doctor role, automatically send OTP after signup
-        print('✅ AuthProvider - Doctor signup data collected successfully');
-        print('📝 Automatically calling doctor-send-otp to send OTP...');
+      if (role == 'doctor' && response['status'] == 'otp_sent') {
+        // Backend now automatically sends OTP during signup
+        print('✅ AuthProvider - Doctor signup completed with automatic OTP');
         
-        // Automatically send OTP after signup
-        final otpResponse = await _apiService.doctorSendOtp({
-          'email': email,
-          'purpose': 'signup'
-        });
-        
-        // Check if OTP and JWT token are available (success even if email fails)
-        if (otpResponse.containsKey('otp') && otpResponse.containsKey('jwt_token')) {
+        // Check if response contains signup_token (JWT token)
+        if (response.containsKey('signup_token')) {
           // Store JWT token for OTP verification
-          _jwtToken = otpResponse['jwt_token'];
+          _jwtToken = response['signup_token'];
           await _storeJwtToken(_jwtToken!);
-          print('✅ AuthProvider - JWT token received and stored');
-          
-          // Get OTP for user reference
-          final otp = otpResponse['otp'];
-          print('✅ AuthProvider - OTP generated: $otp');
-          
-          if (otpResponse.containsKey('error')) {
-            // Email failed but OTP is available - show warning but continue
-            print('⚠️ AuthProvider - Email sending failed, but OTP is available: $otp');
-            print('📧 Email may not have been sent, but you can use OTP: $otp');
-          } else {
-            print('✅ AuthProvider - OTP sent successfully to: $email');
-            print('📧 Check your email for the OTP code');
-          }
+          print('✅ AuthProvider - Signup token received and stored');
+          print('📧 OTP sent to: ${response['email']}');
+          print('📧 Check your email for the OTP code');
         } else {
-          // No OTP or JWT token - this is a real failure
-          print('❌ AuthProvider - Failed to generate OTP: ${otpResponse['error'] ?? 'Unknown error'}');
-          _error = 'Failed to generate OTP: ${otpResponse['error'] ?? 'Unknown error'}';
+          print('❌ AuthProvider - No signup token received');
+          _error = 'Failed to receive signup token';
           _isLoading = false;
           notifyListeners();
           return false;
         }
+      } else if (role == 'doctor') {
+        print('⚠️ AuthProvider - Doctor signup completed but no OTP status found');
+        print('📧 Response: $response');
       }
 
       _isLoading = false;

@@ -113,7 +113,7 @@ class Database:
             raise
     
     def _create_indexes(self):
-        """Create database indexes"""
+        """Create database indexes with proper conflict handling"""
         try:
             print("🔍 Creating indexes...")
             
@@ -139,7 +139,7 @@ class Database:
             
             # Mental health indexes
             if self.mental_health_collection is not None:
-                # Drop old indexes first
+                # Drop old indexes first to avoid conflicts
                 try:
                     self.mental_health_collection.drop_indexes()
                     print("🔍 Dropping old mental health indexes...")

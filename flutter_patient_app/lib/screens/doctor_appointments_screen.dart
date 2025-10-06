@@ -29,29 +29,29 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   }
 
   Widget _buildBody() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
           Icon(
-            Icons.calendar_today,
-            size: 64,
-            color: AppColors.textSecondary,
-          ),
+              Icons.calendar_today,
+              size: 64,
+              color: AppColors.textSecondary,
+            ),
           SizedBox(height: 16),
           Text(
             'Appointments',
-            style: TextStyle(
+              style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
           SizedBox(height: 8),
-          Text(
+                      Text(
             'No appointments scheduled',
-            style: TextStyle(
-              color: AppColors.textSecondary,
+                    style: TextStyle(
+                        color: AppColors.textSecondary,
             ),
           ),
           SizedBox(height: 16),

@@ -85,6 +85,113 @@ class DoctorController:
         except Exception as e:
             return jsonify({'error': f'Server error: {str(e)}'}), 500
     
+    def get_all_doctors(self, request) -> tuple:
+        """Get all doctors list with patient count for patient selection"""
+        try:
+            # Get query parameters
+            page = int(request.args.get('page', 1))
+            limit = int(request.args.get('limit', 20))
+            search = request.args.get('search', '').strip()
+            specialization = request.args.get('specialization', '').strip()
+            city = request.args.get('city', '').strip()
+            min_patients = request.args.get('min_patients', '').strip()
+            
+            # Build query filter
+            query_filter = {"status": {"$ne": "deleted"}}
+            
+            if search:
+                query_filter["$or"] = [
+                    {"username": {"$regex": search, "$options": "i"}},
+                    {"first_name": {"$regex": search, "$options": "i"}},
+                    {"last_name": {"$regex": search, "$options": "i"}},
+                    {"email": {"$regex": search, "$options": "i"}},
+                    {"specialization": {"$regex": search, "$options": "i"}}
+                ]
+            
+            if specialization:
+                query_filter["specialization"] = {"$regex": specialization, "$options": "i"}
+                
+            if city:
+                query_filter["city"] = {"$regex": city, "$options": "i"}
+            
+            # Get doctors from database
+            result = self.doctor_model.get_all_doctors(
+                query_filter=query_filter,
+                page=page,
+                limit=limit
+            )
+            
+            if result['success']:
+                # Filter by minimum patients if specified
+                doctors = result['doctors']
+                if min_patients and min_patients.isdigit():
+                    min_count = int(min_patients)
+                    doctors = [doc for doc in doctors if doc.get('patient_count', 0) >= min_count]
+                    
+                return jsonify({
+                    'success': True,
+                    'doctors': doctors,
+                    'total_count': result['total_count'],
+                    'page': page,
+                    'limit': limit,
+                    'total_pages': result['total_pages'],
+                    'filters_applied': {
+                        'search': search,
+                        'specialization': specialization,
+                        'city': city,
+                        'min_patients': min_patients
+                    }
+                }), 200
+            else:
+                return jsonify({'error': result['error']}), 500
+                
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
+    def get_public_doctor_profile(self, doctor_id: str) -> tuple:
+        """Get public doctor profile for patient selection"""
+        try:
+            if not doctor_id:
+                return jsonify({'error': 'Doctor ID is required'}), 400
+            
+            doctor = self.doctor_model.get_doctor_by_id(doctor_id)
+            if not doctor:
+                return jsonify({'error': 'Doctor not found'}), 404
+            
+            # Get patient count
+            patient_count = self.doctor_model._count_patients_for_doctor(doctor_id)
+            
+            # Prepare public profile (exclude sensitive data)
+            public_profile = {
+                'doctor_id': doctor.get('doctor_id'),
+                'username': doctor.get('username'),
+                'first_name': doctor.get('first_name'),
+                'last_name': doctor.get('last_name'),
+                'specialization': doctor.get('specialization'),
+                'experience_years': doctor.get('experience_years'),
+                'license_number': doctor.get('license_number'),
+                'hospital_name': doctor.get('hospital_name'),
+                'address': doctor.get('address'),
+                'city': doctor.get('city'),
+                'state': doctor.get('state'),
+                'pincode': doctor.get('pincode'),
+                'consultation_fee': doctor.get('consultation_fee'),
+                'languages': doctor.get('languages', []),
+                'qualifications': doctor.get('qualifications', []),
+                'patient_count': patient_count,
+                'status': doctor.get('status'),
+                'created_at': doctor.get('created_at'),
+                'is_profile_complete': doctor.get('is_profile_complete')
+            }
+            
+            return jsonify({
+                'success': True,
+                'doctor': public_profile
+            }), 200
+            
+        except Exception as e:
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
     def get_patients(self, request) -> tuple:
         """Get patients list for doctor"""
         try:
@@ -456,14 +563,14 @@ Please provide a clear, professional medical summary suitable for a doctor's rev
             try:
                 print('📡 Making OpenAI API request...')
                 response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    max_tokens=1000,
-                    temperature=0.3
-                )
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a medical AI assistant that analyzes patient data and provides professional medical summaries for doctors."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=1000,
+                temperature=0.3
+            )
                 print('✅ OpenAI API call successful')
             
                 print(f'✅ OpenAI API response received: {response.usage.total_tokens} tokens used')

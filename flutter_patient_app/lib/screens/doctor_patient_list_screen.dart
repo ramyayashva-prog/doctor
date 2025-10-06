@@ -32,7 +32,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final doctorId = authProvider.patientId; // doctor_id is stored in patientId field
-      
+
       if (doctorId == null || doctorId.isEmpty) {
         setState(() {
           _error = 'Doctor ID not found. Please login again.';
@@ -42,7 +42,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
       }
 
       final response = await _apiService.getDoctorPatients(doctorId);
-      
+
       if (response.containsKey('error')) {
         setState(() {
           _error = response['error'];
@@ -184,8 +184,8 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               Row(
                 children: [
                   CircleAvatar(
@@ -260,15 +260,15 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> {
                         size: 16,
                         color: AppColors.textSecondary,
                       ),
-                      const SizedBox(width: 4),
+                  const SizedBox(width: 4),
                       Text(
                         patient['city'],
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                    ),
+                  ),
+                ],
                   ),
                 ),
             ],

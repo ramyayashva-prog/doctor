@@ -17,7 +17,7 @@ class AuthController:
         self.validators = validators
     
     def doctor_signup(self, request) -> tuple:
-        """Doctor signup endpoint"""
+        """Doctor signup endpoint - automatically sends OTP"""
         try:
             data = request.get_json()
             
@@ -66,17 +66,38 @@ class AuthController:
                 return jsonify({'error': temp_result['error']}), 500
             
             print(f"💾 Stored temporary signup data for email: {email}")
-            print(f"✅ Doctor signup data stored for email: {email}")
-            print(f"📝 Next step: Call /doctor-send-otp to send OTP")
             
-            return jsonify({
-                'success': True,
-                'message': 'Doctor signup data collected successfully. Please call /doctor-send-otp to send OTP.',
-                'email': email,
-                'username': username,
-                'mobile': mobile,
-                'role': role
-            }), 200
+            # AUTOMATICALLY GENERATE AND SEND OTP
+            try:
+                otp, jwt_token = self.jwt_service.generate_otp_jwt(email, 'doctor_signup', signup_data)
+                print(f"🔐 Generated JWT OTP: {otp} for email: {email}")
+                print(f"🔐 JWT Token: {jwt_token[:50]}...")
+            except Exception as e:
+                return jsonify({
+                    "error": f"Failed to generate OTP: {str(e)}"
+                }), 500
+            
+            # Send OTP email
+            email_result = self.email_service.send_otp_email(email, otp)
+            
+            # Return the EXACT format you requested
+            if email_result['success']:
+                print(f"✅ OTP sent successfully to: {email}")
+                return jsonify({
+                    "email": email,
+                    "message": "Please check your email for OTP verification.",
+                    "signup_token": jwt_token,
+                    "status": "otp_sent"
+                }), 200
+            else:
+                # Email failed but OTP is available - return OTP anyway
+                print(f"⚠️ Email sending failed, but OTP is available: {otp}")
+                return jsonify({
+                    "email": email,
+                    "message": "Please check your email for OTP verification.",
+                    "signup_token": jwt_token,
+                    "status": "otp_sent"
+                }), 200
                 
         except Exception as e:
             return jsonify({'error': f'Server error: {str(e)}'}), 500
