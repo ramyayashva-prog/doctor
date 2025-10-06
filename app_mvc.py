@@ -12,6 +12,13 @@ from datetime import datetime, timedelta
 import threading
 import time
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("⚠️ python-dotenv not installed. Install with: pip install python-dotenv")
+
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -35,12 +42,12 @@ CORS(app)
 
 # Configuration
 class Config:
-    MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb+srv://ramya:XxFn6n0NXx0wBplV@cluster0.c1g1bm5.mongodb.net')
-    DATABASE_NAME = os.environ.get('DATABASE_NAME', 'patients_db')
-    SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'ramya.sureshkumar.lm@gmail.com')
-    SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', 'djqs dktf gqor gnqg')
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', '27982af8380786e1f2967dca145cc0ed')
-    JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
+    MONGODB_URI = os.environ.get('MONGODB_URI')
+    DATABASE_NAME = os.environ.get('DATABASE_NAME')
+    SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
+    SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD')
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM')
 
 app.config.from_object(Config)
 
