@@ -332,6 +332,16 @@ def create_doctor_appointment():
     """Create new appointment for doctor"""
     return doctor_controller.create_appointment(request)
 
+@app.route('/doctor/appointments/<appointment_id>', methods=['PUT'])
+def update_doctor_appointment(appointment_id):
+    """Update appointment for doctor"""
+    return doctor_controller.update_appointment(request, appointment_id)
+
+@app.route('/doctor/appointments/<appointment_id>', methods=['DELETE'])
+def delete_doctor_appointment(appointment_id):
+    """Delete appointment for doctor"""
+    return doctor_controller.delete_appointment(request, appointment_id)
+
 @app.route('/doctor/dashboard-stats', methods=['GET'])
 def get_doctor_dashboard_stats():
     """Get dashboard statistics for doctor"""

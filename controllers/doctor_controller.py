@@ -797,6 +797,102 @@ For more detailed analysis, the OpenAI integration needs to be restored."""
             print(f"❌ Error creating appointment: {str(e)}")
             return jsonify({'error': f'Server error: {str(e)}'}), 500
     
+    def update_appointment(self, request, appointment_id: str) -> tuple:
+        """Update an appointment"""
+        try:
+            if not hasattr(self.doctor_model, 'db') or not hasattr(self.doctor_model.db, 'patients_collection'):
+                return jsonify({'error': 'Database connection not available'}), 500
+            
+            patients_collection = self.doctor_model.db.patients_collection
+            data = request.get_json()
+            
+            print(f"🔍 Updating appointment {appointment_id} with data: {data}")
+            
+            # Find the patient with this appointment
+            patient = patients_collection.find_one({
+                "appointments.appointment_id": appointment_id
+            })
+            
+            if not patient:
+                return jsonify({'error': 'Appointment not found'}), 404
+            
+            # Build update fields
+            update_fields = {}
+            if 'appointment_date' in data:
+                update_fields['appointments.$.appointment_date'] = data['appointment_date']
+            if 'appointment_time' in data:
+                update_fields['appointments.$.appointment_time'] = data['appointment_time']
+            if 'appointment_type' in data:
+                update_fields['appointments.$.appointment_type'] = data['appointment_type']
+            if 'appointment_mode' in data:
+                update_fields['appointments.$.appointment_mode'] = data['appointment_mode']
+            if 'video_link' in data:
+                update_fields['appointments.$.video_link'] = data['video_link']
+            if 'appointment_status' in data:
+                update_fields['appointments.$.appointment_status'] = data['appointment_status']
+            if 'notes' in data:
+                update_fields['appointments.$.notes'] = data['notes']
+            
+            update_fields['appointments.$.updated_at'] = datetime.now().isoformat()
+            
+            # Update the appointment
+            result = patients_collection.update_one(
+                {"appointments.appointment_id": appointment_id},
+                {"$set": update_fields}
+            )
+            
+            if result.modified_count > 0:
+                print(f"✅ Appointment {appointment_id} updated successfully")
+                return jsonify({
+                    'success': True,
+                    'message': 'Appointment updated successfully',
+                    'appointment_id': appointment_id
+                }), 200
+            else:
+                return jsonify({'error': 'No changes made or appointment not found'}), 400
+                
+        except Exception as e:
+            print(f"❌ Error updating appointment: {str(e)}")
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
+    def delete_appointment(self, request, appointment_id: str) -> tuple:
+        """Delete an appointment"""
+        try:
+            if not hasattr(self.doctor_model, 'db') or not hasattr(self.doctor_model.db, 'patients_collection'):
+                return jsonify({'error': 'Database connection not available'}), 500
+            
+            patients_collection = self.doctor_model.db.patients_collection
+            
+            print(f"🔍 Deleting appointment {appointment_id}")
+            
+            # Find the patient with this appointment
+            patient = patients_collection.find_one({
+                "appointments.appointment_id": appointment_id
+            })
+            
+            if not patient:
+                return jsonify({'error': 'Appointment not found'}), 404
+            
+            # Remove the appointment from the array
+            result = patients_collection.update_one(
+                {"appointments.appointment_id": appointment_id},
+                {"$pull": {"appointments": {"appointment_id": appointment_id}}}
+            )
+            
+            if result.modified_count > 0:
+                print(f"✅ Appointment {appointment_id} deleted successfully")
+                return jsonify({
+                    'success': True,
+                    'message': 'Appointment deleted successfully',
+                    'appointment_id': appointment_id
+                }), 200
+            else:
+                return jsonify({'error': 'Failed to delete appointment'}), 500
+                
+        except Exception as e:
+            print(f"❌ Error deleting appointment: {str(e)}")
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
     def get_dashboard_stats(self, request) -> tuple:
         """Get dashboard statistics for doctor"""
         try:
