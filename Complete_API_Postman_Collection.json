@@ -496,6 +496,24 @@
           }
         },
         {
+          "name": "Get Single Appointment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctor/appointments/{{appointment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "appointments", "{{appointment_id}}"]
+            },
+            "description": "Get a specific appointment by its appointment_id"
+          }
+        },
+        {
           "name": "Create Appointment",
           "event": [
             {
@@ -718,7 +736,120 @@
       ]
     },
     {
-      "name": "6. Patient CRUD",
+      "name": "6. Patient Health Data",
+      "item": [
+        {
+          "name": "Get Medication History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medication/get-medication-history/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["medication", "get-medication-history", "{{patient_id}}"]
+            },
+            "description": "Get medication history for a patient"
+          }
+        },
+        {
+          "name": "Get Food Entries (Nutrition)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nutrition/get-food-entries/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["nutrition", "get-food-entries", "{{patient_id}}"]
+            },
+            "description": "Get nutrition/food entries for a patient"
+          }
+        },
+        {
+          "name": "Get Mental Health History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/mental-health/history/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["mental-health", "history", "{{patient_id}}"]
+            },
+            "description": "Get mental health history for a patient"
+          }
+        },
+        {
+          "name": "Get Kick Count History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/kick-count/get-kick-history/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["kick-count", "get-kick-history", "{{patient_id}}"]
+            },
+            "description": "Get kick count history for a patient"
+          }
+        },
+        {
+          "name": "Get Prescription Documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescription/documents/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["prescription", "documents", "{{patient_id}}"]
+            },
+            "description": "Get prescription documents for a patient"
+          }
+        },
+        {
+          "name": "Get Vital Signs History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vital-signs/history/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["vital-signs", "history", "{{patient_id}}"]
+            },
+            "description": "Get vital signs history for a patient"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Patient CRUD",
       "item": [
         {
           "name": "Get All Patients",

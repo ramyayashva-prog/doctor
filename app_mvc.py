@@ -332,6 +332,11 @@ def create_doctor_appointment():
     """Create new appointment for doctor"""
     return doctor_controller.create_appointment(request)
 
+@app.route('/doctor/appointments/<appointment_id>', methods=['GET'])
+def get_single_appointment(appointment_id):
+    """Get single appointment by ID"""
+    return doctor_controller.get_appointment_by_id(request, appointment_id)
+
 @app.route('/doctor/appointments/<appointment_id>', methods=['PUT'])
 def update_doctor_appointment(appointment_id):
     """Update appointment for doctor"""

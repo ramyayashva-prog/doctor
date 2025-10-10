@@ -797,6 +797,49 @@ For more detailed analysis, the OpenAI integration needs to be restored."""
             print(f"❌ Error creating appointment: {str(e)}")
             return jsonify({'error': f'Server error: {str(e)}'}), 500
     
+    def get_appointment_by_id(self, request, appointment_id: str) -> tuple:
+        """Get a single appointment by ID"""
+        try:
+            if not hasattr(self.doctor_model, 'db') or not hasattr(self.doctor_model.db, 'patients_collection'):
+                return jsonify({'error': 'Database connection not available'}), 500
+            
+            patients_collection = self.doctor_model.db.patients_collection
+            
+            print(f"🔍 Getting appointment {appointment_id}")
+            
+            # Find the patient with this appointment
+            patient = patients_collection.find_one({
+                "appointments.appointment_id": appointment_id
+            })
+            
+            if not patient:
+                return jsonify({'error': 'Appointment not found'}), 404
+            
+            # Find the specific appointment in the appointments array
+            appointment = None
+            for apt in patient.get('appointments', []):
+                if apt.get('appointment_id') == appointment_id:
+                    appointment = apt
+                    # Add patient name to the appointment
+                    patient_name = f"{patient.get('first_name', '')} {patient.get('last_name', '')}".strip() or patient.get('username', 'Unknown')
+                    appointment['patient_name'] = patient_name
+                    appointment['patient_id'] = patient.get('patient_id')
+                    break
+            
+            if not appointment:
+                return jsonify({'error': 'Appointment not found'}), 404
+            
+            print(f"✅ Found appointment: {appointment.get('appointment_date')} at {appointment.get('appointment_time')}")
+            
+            return jsonify({
+                'success': True,
+                'appointment': appointment
+            }), 200
+            
+        except Exception as e:
+            print(f"❌ Error getting appointment: {str(e)}")
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
     def update_appointment(self, request, appointment_id: str) -> tuple:
         """Update an appointment"""
         try:
